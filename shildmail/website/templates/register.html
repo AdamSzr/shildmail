@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}
+  Register - ShildMail
+{% endblock %}
+
+
+{% block content %}
+  <h1>Register</h1>
+  <form action='POST' onsubmit='/api/register'>
+    <input name='email' />
+    <input name='password' />
+    <input name='secret' />
+  </form>
+{% endblock %}

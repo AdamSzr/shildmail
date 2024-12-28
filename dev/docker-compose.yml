@@ -1,0 +1,15 @@
+version: '3.9'
+
+services:
+  local-postgres-db:
+    image: postgres
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=mailreader
+      - POSTGRES_USER=mailreader
+      - POSTGRES_DB=mail
+
+# driver = pgsql
+# connect = host=localhost dbname=mail user=mailreader password=mailreader
+# postgresql://mailreader:mailreader@188.245.198.229:5432/mail
