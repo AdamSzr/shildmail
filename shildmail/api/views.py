@@ -5,6 +5,9 @@ from django.urls import reverse
 from shildmail.website.forms import LoginForm
 from django.contrib.auth import authenticate, login, logout
 from shildmail.imap.manager import imap_manager
+from cryptography.hazmat.primitives.asymmetric import rsa, padding
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives import serialization
 
 def api_login(request):
     if request.method != 'POST':
@@ -39,7 +42,41 @@ def api_send_email():
 
 
 def api_ping(request):
-    print(request.session.session_key,request.session.get('email'),request.session.items() )
-    return JsonResponse({'session': request.session.session_key})
+    # Generowanie kluczy RSA (tylko w celach demonstracyjnych)
+    private_key = rsa.generate_private_key(
+        public_exponent=65537,
+        key_size=2048
+    )
+    public_key = private_key.public_key()
+
+    # Wiadomość do podpisania
+    message = b"This is a secret message"
+
+    # Podpisanie wiadomości kluczem prywatnym
+    signature = private_key.sign(
+        message,
+        padding.PSS(
+            mgf=padding.MGF1(hashes.SHA256()),
+            salt_length=padding.PSS.MAX_LENGTH
+        ),
+        hashes.SHA256()
+    )
+
+    # Weryfikacja podpisu kluczem publicznym
+    try:
+        public_key.verify(
+            signature,
+            message+b'1',
+            padding.PSS(
+                mgf=padding.MGF1(hashes.SHA256()),
+                salt_length=padding.PSS.MAX_LENGTH
+            ),
+            hashes.SHA256()
+        )
+        print("Wiadomość została pomyślnie zweryfikowana!")
+    except Exception as e:
+        print(f"Weryfikacja nie powiodła się: {e}")
+
+    return JsonResponse({'session': request.session.session_key, 'message_raw':message.decode(), 'message_to_ver': (message+b'1').decode() })
 
 

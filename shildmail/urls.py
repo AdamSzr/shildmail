@@ -1,3 +1,7 @@
+
+from django.conf import settings
+from django.conf.urls.static import static
+
 """
 URL configuration for shildmail project.
 
@@ -20,4 +24,4 @@ from django.urls import include, path
 urlpatterns = [
     path('api/', include('shildmail.api.urls')),
     path('', include('shildmail.website.urls')),
-]
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT) #...url.../static/image.png
