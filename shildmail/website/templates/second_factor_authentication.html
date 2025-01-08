@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}
+  2FA - ShildMail
+{% endblock %}
+{% block scripts %}
+    <script>
+      const csrfToken = "{{ csrf_token }}";
+    </script>
+    <script src="https://unpkg.com/@simplewebauthn/browser/dist/bundle/index.umd.min.js"></script>
+{% endblock %}
+
+
+
+{% block content %}
+  <h1>Second Factor Authentication</h1>
+  <button id='auth' onclick='device_auth()' >
+    Autoryzuj
+  </button>
+
+
+  <script>
+     async function device_auth() {
+      authenticationOptionsJSON = await fetch('/api/webauthn')
+      .then(it => it.json())
+
+      console.log('AUTHENTICATION OPTIONS')
+      console.log(authenticationOptionsJSON)
+
+      const authResp = await SimpleWebAuthnBrowser.startAuthentication({
+        optionsJSON: authenticationOptionsJSON
+      });
+
+      console.log('AUTHENTICATION RESPONSE');
+      console.log(authResp);
+
+      const apiAuthVerResp = await fetch('/api/webauthn', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken':csrfToken },
+        body: JSON.stringify(authResp),
+      })
+      .then(it => it.json())
+  
+// # Simple Options
+// simple_authentication_options = generate_authentication_options(rp_id="example.com")
+// 
+// print("\n[Authentication Options - Simple]")
+// print(options_to_json(simple_authentication_options))
+
+    }
+  </script>
+
+{% endblock %}
+
+

@@ -22,12 +22,14 @@ def login(request):
 
     return render(request, 'login.html', {'form': LoginForm()})
 
+def second_factor_authentication(request):
+    return render(request, 'second_factor_authentication.html')
+
 def register(request):
     return render(request, 'home.html',{'name':'register'})
 
 def register_credentials(request):
-    return render(request, 'home.html',{'name':'register credentials'})
-
+    return render(request, 'register_credentials.html',{'name':'register credentials'})
 
 
 def decode_mime_words(s):

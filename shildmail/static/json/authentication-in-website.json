@@ -1,0 +1,96 @@
+{
+    "AUTHENTICATION_OPTIONS": {
+        "challenge": "cvamlFmhqb8RdPb-F2p5l6FNM9sC2DRaylqS5oKVbMJbajtColzQ32KtaT28RhY-Pql_FYcC0856gevuSp6C2Q",
+        "timeout": 60000,
+        "rpId": "webauthn.io",
+        "allowCredentials": [
+            {
+                "id": "CIBwqzXhd6R1BtGvwZedJy8pVR6FqSZ09NWjNqe6zcE",
+                "type": "public-key",
+                "transports": [
+                    "internal"
+                ]
+            },
+            {
+                "id": "JVI36ImVzKX1eBB0zQ6xZ7H8vrY",
+                "type": "public-key",
+                "transports": [
+                    "hybrid",
+                    "internal"
+                ]
+            },
+            {
+                "id": "UMVhD-QGUT2lnvz-j3LFcw",
+                "type": "public-key",
+                "transports": [
+                    "hybrid",
+                    "internal"
+                ]
+            },
+            {
+                "id": "Mku0BsKozAkc3hc5Ax6Dm4of69IV9tO7JW-XPMZa7gNBC-mmDv8Bl1DhEVeQexy8",
+                "type": "public-key",
+                "transports": [
+                    "nfc",
+                    "usb"
+                ]
+            },
+            {
+                "id": "62JF36mD8NWxpTITEZV9NQ",
+                "type": "public-key",
+                "transports": [
+                    "hybrid",
+                    "internal"
+                ]
+            },
+            {
+                "id": "zTyxGJJbqtOpY9cdI3RsKQ",
+                "type": "public-key",
+                "transports": [
+                    "internal",
+                    "hybrid"
+                ]
+            },
+            {
+                "id": "UvwcoUuUH6o7H9EPy-zOXIFKS8Z6QTonCXI-tdIkxbStLNNEI_IxzTmqQZM4dwjl1UOgOXscwyPp09CvalpOEeAUJrGmuaHcRmwSJtg7XWgopZzlVFXFRyhk_v01Pliz",
+                "type": "public-key"
+            },
+            {
+                "id": "7ACsqlxBqhQ4Nn07W4ZsRQ",
+                "type": "public-key",
+                "transports": [
+                    "hybrid",
+                    "internal"
+                ]
+            },
+            {
+                "id": "LEqR4qz2Sa67bRg9QC9qLg",
+                "type": "public-key",
+                "transports": [
+                    "internal"
+                ]
+            },
+            {
+                "id": "XqWHtqXd4bkgDte1UEwK58XCZj9nVHi6LKjwGmR_Xz5_0YGCrErOQdMPQvJIRNylNCk9ci1c8swN-6P0-EliLQ",
+                "type": "public-key",
+                "transports": [
+                    "nfc"
+                ]
+            }
+        ],
+        "userVerification": "preferred"
+    },
+    "AUTHENTICATION_RESPONSE": {
+        "id": "Mku0BsKozAkc3hc5Ax6Dm4of69IV9tO7JW-XPMZa7gNBC-mmDv8Bl1DhEVeQexy8",
+        "rawId": "Mku0BsKozAkc3hc5Ax6Dm4of69IV9tO7JW-XPMZa7gNBC-mmDv8Bl1DhEVeQexy8",
+        "response": {
+            "authenticatorData": "dKbqkhPJnC90siSSsyDPQCYqlMGpUKA5fyklC2CEHvAFAAAACA",
+            "clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoiY3ZhbWxGbWhxYjhSZFBiLUYycDVsNkZOTTlzQzJEUmF5bHFTNW9LVmJNSmJhanRDb2x6UTMyS3RhVDI4UmhZLVBxbF9GWWNDMDg1NmdldnVTcDZDMlEiLCJvcmlnaW4iOiJodHRwczovL3dlYmF1dGhuLmlvIiwiY3Jvc3NPcmlnaW4iOmZhbHNlfQ",
+            "signature": "_I-qUoRL3WHUjTvuQVYUzgXhbfiatFBrT2I5gG-MSyEIen7rdkuZaAswe3RozhhF2cGdidnnQ3a_a_Jkx0YMCQ",
+            "userHandle": "A8m7Tt8FN7Sqkstd4b1Ogv4WqLe2q5TiJ1dTYHJlIAg"
+        },
+        "type": "public-key",
+        "clientExtensionResults": {},
+        "authenticatorAttachment": "cross-platform"
+    }
+}

@@ -1,0 +1,128 @@
+{
+    "REGISTRATION_OPTIONS": {
+        "rp": {
+            "name": "webauthn.io",
+            "id": "webauthn.io"
+        },
+        "user": {
+            "id": "A8m7Tt8FN7Sqkstd4b1Ogv4WqLe2q5TiJ1dTYHJlIAg",
+            "name": "Test",
+            "displayName": "Test"
+        },
+        "challenge": "MxFYXA2MQrsZxnSCtN3CJGChncXzZhIY0N77uzAAVLl-5GiDfbw3QGytlQrGp-bWKrnB6i0JvHFA0ztNM1e6cg",
+        "pubKeyCredParams": [
+            {
+                "type": "public-key",
+                "alg": -8
+            },
+            {
+                "type": "public-key",
+                "alg": -7
+            },
+            {
+                "type": "public-key",
+                "alg": -257
+            }
+        ],
+        "timeout": 60000,
+        "excludeCredentials": [
+            {
+                "id": "CIBwqzXhd6R1BtGvwZedJy8pVR6FqSZ09NWjNqe6zcE",
+                "type": "public-key",
+                "transports": [
+                    "internal"
+                ]
+            },
+            {
+                "id": "JVI36ImVzKX1eBB0zQ6xZ7H8vrY",
+                "type": "public-key",
+                "transports": [
+                    "hybrid",
+                    "internal"
+                ]
+            },
+            {
+                "id": "UMVhD-QGUT2lnvz-j3LFcw",
+                "type": "public-key",
+                "transports": [
+                    "hybrid",
+                    "internal"
+                ]
+            },
+            {
+                "id": "62JF36mD8NWxpTITEZV9NQ",
+                "type": "public-key",
+                "transports": [
+                    "hybrid",
+                    "internal"
+                ]
+            },
+            {
+                "id": "zTyxGJJbqtOpY9cdI3RsKQ",
+                "type": "public-key",
+                "transports": [
+                    "internal",
+                    "hybrid"
+                ]
+            },
+            {
+                "id": "UvwcoUuUH6o7H9EPy-zOXIFKS8Z6QTonCXI-tdIkxbStLNNEI_IxzTmqQZM4dwjl1UOgOXscwyPp09CvalpOEeAUJrGmuaHcRmwSJtg7XWgopZzlVFXFRyhk_v01Pliz",
+                "type": "public-key"
+            },
+            {
+                "id": "7ACsqlxBqhQ4Nn07W4ZsRQ",
+                "type": "public-key",
+                "transports": [
+                    "hybrid",
+                    "internal"
+                ]
+            },
+            {
+                "id": "LEqR4qz2Sa67bRg9QC9qLg",
+                "type": "public-key",
+                "transports": [
+                    "internal"
+                ]
+            },
+            {
+                "id": "XqWHtqXd4bkgDte1UEwK58XCZj9nVHi6LKjwGmR_Xz5_0YGCrErOQdMPQvJIRNylNCk9ci1c8swN-6P0-EliLQ",
+                "type": "public-key",
+                "transports": [
+                    "nfc"
+                ]
+            }
+        ],
+        "authenticatorSelection": {
+            "residentKey": "preferred",
+            "requireResidentKey": false,
+            "userVerification": "preferred"
+        },
+        "attestation": "none",
+        "hints": [],
+        "extensions": {
+            "credProps": true
+        }
+    },
+    "REGISTRATION_RESPONSE": {
+        "id": "Mku0BsKozAkc3hc5Ax6Dm4of69IV9tO7JW-XPMZa7gNBC-mmDv8Bl1DhEVeQexy8",
+        "rawId": "Mku0BsKozAkc3hc5Ax6Dm4of69IV9tO7JW-XPMZa7gNBC-mmDv8Bl1DhEVeQexy8",
+        "response": {
+            "attestationObject": "o2NmbXRkbm9uZWdhdHRTdG10oGhhdXRoRGF0YVifdKbqkhPJnC90siSSsyDPQCYqlMGpUKA5fyklC2CEHvDFAAAAAwAAAAAAAAAAAAAAAAAAAAAAMDJLtAbCqMwJHN4XOQMeg5uKH-vSFfbTuyVvlzzGWu4DQQvppg7_AZdQ4RFXkHscvKQBAQMnIAYhWCAyS7QGwqjMCRzeFzkD0o1luMAgBoT_uzSP-DUsaZZwo6FrY3JlZFByb3RlY3QC",
+            "clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uY3JlYXRlIiwiY2hhbGxlbmdlIjoiTXhGWVhBMk1RcnNaeG5TQ3ROM0NKR0NobmNYelpoSVkwTjc3dXpBQVZMbC01R2lEZmJ3M1FHeXRsUXJHcC1iV0tybkI2aTBKdkhGQTB6dE5NMWU2Y2ciLCJvcmlnaW4iOiJodHRwczovL3dlYmF1dGhuLmlvIiwiY3Jvc3NPcmlnaW4iOmZhbHNlfQ",
+            "transports": [
+                "nfc",
+                "usb"
+            ],
+            "publicKeyAlgorithm": -8,
+            "publicKey": "MCowBQYDK2VwAyEAMku0BsKozAkc3hc5A9KNZbjAIAaE_7s0j_g1LGmWcKM",
+            "authenticatorData": "dKbqkhPJnC90siSSsyDPQCYqlMGpUKA5fyklC2CEHvDFAAAAAwAAAAAAAAAAAAAAAAAAAAAAMDJLtAbCqMwJHN4XOQMeg5uKH-vSFfbTuyVvlzzGWu4DQQvppg7_AZdQ4RFXkHscvKQBAQMnIAYhWCAyS7QGwqjMCRzeFzkD0o1luMAgBoT_uzSP-DUsaZZwo6FrY3JlZFByb3RlY3QC"
+        },
+        "type": "public-key",
+        "clientExtensionResults": {
+            "credProps": {
+                "rk": true
+            }
+        },
+        "authenticatorAttachment": "cross-platform"
+    }
+}

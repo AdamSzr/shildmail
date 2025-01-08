@@ -131,3 +131,9 @@ AUTHENTICATION_BACKENDS = [
     'shildmail.middleware.auth.CustomEmailBackend',  # Ścieżka do backendu
     # 'django.contrib.auth.backends.ModelBackend',           # Domyślny backend Django
 ]
+
+WEBAUTH_RP_ID = 'localhost' #the hostname (minus scheme and port) of the server running your Django app
+
+WEBAUTH_RP_NAME = 'Shild Mail' # human readable name of your server intended only for display
+
+WEBAUTH_ORIGIN = 'http://localhost:3000' #used for verifying assertions. Only authentication ceremonies occurring in this origin will validate

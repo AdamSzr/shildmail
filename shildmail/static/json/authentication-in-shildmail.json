@@ -1,0 +1,21 @@
+{
+    "AUTHENTICATION_OPTIONS": {
+        "challenge": "d6ckiHJAWkyZp_9zQthz_39-HTRa_NFVsmycElpYaQgGR8059kzAHqOtnPJdC8pIeouCxa-kTuVuDzPT71VE6Q",
+        "timeout": 60000,
+        "rpId": "localhost",
+        "allowCredentials": [],
+        "userVerification": "preferred"
+    },
+    "AUTHENTICATION_RESPONSE": {
+        "id": "hd13mYSxQiLaPSpf1KRHeAATJQj4WPUnz8qS9tRroF0",
+        "rawId": "hd13mYSxQiLaPSpf1KRHeAATJQj4WPUnz8qS9tRroF0",
+        "response": {
+            "authenticatorData": "SZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2MFAAAAAg",
+            "clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoibVB3eFZSMDlnMEYwODNncUN3RDExYWI0eDNQTy1RdmpnQ1pINmRmbWxza3pEVks1QW5PbVJ4TXQ0RC1yeUU1NFRRSHpuM3ZRZkVEMW83S0c0cm1MSVEiLCJvcmlnaW4iOiJodHRwOi8vbG9jYWxob3N0OjMwMDAiLCJjcm9zc09yaWdpbiI6ZmFsc2V9",
+            "signature": "MEUCIQDJt_Cw_lcI7XZPpoTO4Lb9UJgcUCf-FXROf-sW-HQEuQIgLx3KNUpCHs5KHdB-By-MZpzaajEVCwkDnidcS355kzc"
+        },
+        "type": "public-key",
+        "clientExtensionResults": {},
+        "authenticatorAttachment": "cross-platform"
+    }
+}

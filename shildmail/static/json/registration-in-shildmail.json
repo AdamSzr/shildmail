@@ -1,0 +1,79 @@
+{
+    "REGISTRATION_OPTIONS": {
+        "rp": {
+            "name": "Shild Mail",
+            "id": "localhost"
+        },
+        "user": {
+            "id": "Tp8Uyz2bJE3OVmSqMlhpcPMDYgnVtqJbMOoli9tVSbT9TdXGo8KGM9zP_GGVOcr7EVXoeVjSpVki4WUF6WzTsg",
+            "name": "simple@adamszreiber.pl",
+            "displayName": "simple@adamszreiber.pl"
+        },
+        "challenge": "-TNiapX77Up2fB2AVUqgFBsPBjek1RQQi0YWTXnweesH7ybB4wKassnocj4kt5AIrmlJODio4NnCGR1pUkkv2Q",
+        "pubKeyCredParams": [
+            {
+                "type": "public-key",
+                "alg": -7
+            },
+            {
+                "type": "public-key",
+                "alg": -8
+            },
+            {
+                "type": "public-key",
+                "alg": -36
+            },
+            {
+                "type": "public-key",
+                "alg": -37
+            },
+            {
+                "type": "public-key",
+                "alg": -38
+            },
+            {
+                "type": "public-key",
+                "alg": -39
+            },
+            {
+                "type": "public-key",
+                "alg": -257
+            },
+            {
+                "type": "public-key",
+                "alg": -258
+            },
+            {
+                "type": "public-key",
+                "alg": -259
+            }
+        ],
+        "timeout": 60000,
+        "excludeCredentials": [],
+        "attestation": "none",
+        "extensions": {
+            "credProps": true
+        }
+    },
+    "REGISTRATION_RESPONSE": {
+        "id": "3ZHRwNjSabtYyzi5KU3u7rUM7zui0-XUGIpbb3ac-Yk",
+        "rawId": "3ZHRwNjSabtYyzi5KU3u7rUM7zui0-XUGIpbb3ac-Yk",
+        "response": {
+            "attestationObject": "o2NmbXRkbm9uZWdhdHRTdG10oGhhdXRoRGF0YVikSZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2NFAAAAAQAAAAAAAAAAAAAAAAAAAAAAIN2R0cDY0mm7WMs4uSlN7u61DO87otPl1BiKW292nPmJpQECAyYgASFYIJKB9xoAdGIvmGnQvbLk9srXTcJkkadMuJd-HirdhVtHIlggL9Nx6K5W93t6tTz6vl8m9otb3tGeIaAM7VU-I4_1w7s",
+            "clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uY3JlYXRlIiwiY2hhbGxlbmdlIjoiLVROaWFwWDc3VXAyZkIyQVZVcWdGQnNQQmplazFSUVFpMFlXVFhud2Vlc0g3eWJCNHdLYXNzbm9jajRrdDVBSXJtbEpPRGlvNE5uQ0dSMXBVa2t2MlEiLCJvcmlnaW4iOiJodHRwOi8vbG9jYWxob3N0OjMwMDAiLCJjcm9zc09yaWdpbiI6ZmFsc2V9",
+            "transports": [
+                "usb"
+            ],
+            "publicKeyAlgorithm": -7,
+            "publicKey": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEkoH3GgB0Yi-YadC9suT2ytdNwmSRp0y4l34eKt2FW0cv03Horlb3e3q1PPq-Xyb2i1ve0Z4hoAztVT4jj_XDuw",
+            "authenticatorData": "SZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2NFAAAAAQAAAAAAAAAAAAAAAAAAAAAAIN2R0cDY0mm7WMs4uSlN7u61DO87otPl1BiKW292nPmJpQECAyYgASFYIJKB9xoAdGIvmGnQvbLk9srXTcJkkadMuJd-HirdhVtHIlggL9Nx6K5W93t6tTz6vl8m9otb3tGeIaAM7VU-I4_1w7s"
+        },
+        "type": "public-key",
+        "clientExtensionResults": {
+            "credProps": {
+                "rk": false
+            }
+        },
+        "authenticatorAttachment": "cross-platform"
+    }
+}
