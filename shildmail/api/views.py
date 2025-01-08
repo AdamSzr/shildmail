@@ -4,7 +4,7 @@ from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, HttpRe
 from django.shortcuts import redirect
 from django.urls import reverse
 from webauthn import generate_authentication_options, generate_registration_options, options_to_json, verify_authentication_response, verify_registration_response
-from shildmail.decorators import check_device_id
+from shildmail.decorators import webauthn_login_required
 from shildmail.models.passkeys import WebAuthnCredential, WebAuthnCredentialManager
 from shildmail.models.user import User
 from shildmail.settings import WEBAUTH_ORIGIN, WEBAUTH_RP_ID, WEBAUTH_RP_NAME
@@ -22,10 +22,11 @@ from webauthn.helpers import (
 )
 
 from webauthn.helpers.structs import (
-    PublicKeyCredentialDescriptor
+    PublicKeyCredentialDescriptor,
+    PublicKeyCredentialType,
+    AuthenticatorTransport,
 )
 
-from shildmail.cashe import memory_storage
 
 def api_login(request):
     if request.method != 'POST':
@@ -44,7 +45,12 @@ def api_login(request):
     if(user):  # Zapisanie użytkownika w sesji
         login(request=request, user=user)
         request.session['email'] = email
-        return redirect('home')
+
+        hasKeys = WebAuthnCredential.objects.filter(username=email).exists()
+
+        if(hasKeys): return redirect('2fa')
+        else: return redirect('register-credentials')
+
     else: return JsonResponse({'message':"Invalid credentials"}, status=400)
 
 
@@ -58,15 +64,25 @@ def api_logout(request):
 
 def api_register_webauthn_device(request):
     if request.method == 'GET':
-      simple_registration_options = generate_registration_options(
+      credentials = WebAuthnCredential.objects.filter(username=request.user.email)
+
+      registration_options = generate_registration_options(
         rp_id=WEBAUTH_RP_ID,
         rp_name=WEBAUTH_RP_NAME,
         user_name=request.user.email,
+        exclude_credentials=[
+            PublicKeyCredentialDescriptor(
+              id=credential.credential_id,
+              type= PublicKeyCredentialType(credential.credential_type),
+              transports=[ AuthenticatorTransport(trans) for trans in credential.transports ]
+            )
+            for credential in credentials
+        ]
       )
 
-      request.session['challange'] = simple_registration_options.challenge.hex()
+      request.session['challange'] = registration_options.challenge.hex()
 
-      options_json = json.loads(options_to_json(simple_registration_options))
+      options_json = json.loads(options_to_json(registration_options))
 
       options_json["extensions"] = {
         "credProps": True,
@@ -86,16 +102,6 @@ def api_register_webauthn_device(request):
           require_user_verification=False,
       )
 
-      transports: list = body_json['response'].get("transports", [])
-
-      cred_to_store_in_db = {
-          'username':request.user.email,
-          'verification':verification,
-          'transports':transports,
-          'is_discoverable_credential':None,
-      }
-
-
       new_passkey = WebAuthnCredential.objects.create(
           username=request.user.email,
           credential_id=verification.credential_id,
@@ -111,27 +117,21 @@ def api_register_webauthn_device(request):
 
       new_passkey.save()
 
-      print(cred_to_store_in_db) #credential_service
-      memory_storage.set(request.user.email, cred_to_store_in_db) #credential_service
-
       return JsonResponse({"added":True})
 
 def api_webauthn(request):
     if request.method == 'GET':
-      
       credentials = WebAuthnCredential.objects.filter(username=request.user.email)
 
-      stored_device = memory_storage.get(request.user.email)
-
       authentication_options = generate_authentication_options(
-         rp_id=WEBAUTH_RP_ID,
-         allow_credentials=[PublicKeyCredentialDescriptor(id=stored_device['verification'].credential_id) ],
+        rp_id=WEBAUTH_RP_ID,
+        allow_credentials=[
+            PublicKeyCredentialDescriptor(id=credential.credential_id)
+            for credential in credentials
+        ],
       )
 
-      challange = authentication_options.challenge.hex()
-      request.session['challenge'] = challange
-
-      memory_storage.set(challange, authentication_options)
+      request.session['challenge'] = authentication_options.challenge.hex()
 
       response_json = json.loads(options_to_json(authentication_options))
 
@@ -139,23 +139,25 @@ def api_webauthn(request):
     else:
       body_json: dict = json.loads(request.body)
       credential = parse_authentication_credential_json(body_json)
+      db_credential = WebAuthnCredential.objects.filter(username=request.user.email, credential_id=credential.raw_id).first()
 
-      stored_device = memory_storage.get(request.user.email)
-      challange = request.session['challenge']
-      options = memory_storage.get(challange)
-
+      challenge = request.session['challenge']
 
       verification = verify_authentication_response(
             credential=credential,
-            expected_challenge=options.challenge,
+            expected_challenge=bytes.fromhex(challenge),
             expected_rp_id=WEBAUTH_RP_ID,
             expected_origin=WEBAUTH_ORIGIN,
-            require_user_verification=False,
-            credential_public_key=stored_device['verification'].credential_public_key,
-            credential_current_sign_count=90,
+            credential_public_key=db_credential.credential_public_key,
+            credential_current_sign_count=db_credential.sign_count,
       )
 
       print(verification)
+
+      WebAuthnCredential.objects.increment_sign_count(credential_id=credential.raw_id)
+
+      request.session['credential_id'] = credential.id
+
       return JsonResponse({"verified": True})
 
 def api_send_email():
