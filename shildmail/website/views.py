@@ -9,7 +9,7 @@ from django.contrib.auth import authenticate, login
 from django.contrib import messages
 
 from shildmail.imap.manager import imap_manager
-from shildmail.website.forms import LoginForm
+from shildmail.website.forms import LoginForm, RegisterForm
 from email.header import decode_header
 
 
@@ -26,7 +26,7 @@ def second_factor_authentication(request):
     return render(request, 'second_factor_authentication.html')
 
 def register(request):
-    return render(request, 'home.html',{'name':'register'})
+    return render(request, 'register.html',{'form':RegisterForm()})
 
 def register_credentials(request):
     return render(request, 'register_credentials.html',{'name':'register credentials'})

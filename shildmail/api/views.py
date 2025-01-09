@@ -1,23 +1,17 @@
 import json
 from pyexpat.errors import messages
-from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, HttpResponseBadRequest
+from django.http import HttpResponseRedirect, JsonResponse, HttpResponseBadRequest
 from django.shortcuts import redirect
 from django.urls import reverse
 from webauthn import generate_authentication_options, generate_registration_options, options_to_json, verify_authentication_response, verify_registration_response
-from shildmail.decorators import webauthn_login_required
-from shildmail.models.passkeys import WebAuthnCredential, WebAuthnCredentialManager
+from shildmail.models.passkeys import WebAuthnCredential
 from shildmail.models.user import User
 from shildmail.settings import WEBAUTH_ORIGIN, WEBAUTH_RP_ID, WEBAUTH_RP_NAME
-from shildmail.website.forms import LoginForm
+from shildmail.website.forms import LoginForm, RegisterForm
 from django.contrib.auth import authenticate, login, logout
 from shildmail.imap.manager import imap_manager
-from cryptography.hazmat.primitives.asymmetric import rsa, padding
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives import serialization
 from webauthn.helpers import (
-    base64url_to_bytes,
     parse_registration_credential_json,
-    parse_registration_options_json,
     parse_authentication_credential_json
 )
 
@@ -55,7 +49,27 @@ def api_login(request):
 
 
 def api_register(request):
-    return JsonResponse({'message': 'API register endpoint'})
+    if(request.method!='POST'):
+      return JsonResponse({'result':False, 'message': 'invalid http method'})
+
+    form = RegisterForm(request.POST)
+
+    if(not form.is_valid()):
+      return JsonResponse({'result':False, 'message': 'Form validatioin'})
+
+    data = form.cleaned_data
+    if User.objects.filter(email=data['username']).exists():
+        return JsonResponse({'result':False, 'message': 'Email already taken'})
+
+    user = User.objects.create(
+       email=data['username'],
+       realname=data['realname'],
+       password=data['password'],
+       maildir=data['realname'].lower().replace(' ', '_') + '/'
+       )
+    print(user)
+    return JsonResponse({'result':True})
+
 
 def api_logout(request):
     imap_manager.close_connection(request.session.session_key)
@@ -152,8 +166,6 @@ def api_webauthn(request):
             credential_current_sign_count=db_credential.sign_count,
       )
 
-      print(verification)
-
       WebAuthnCredential.objects.increment_sign_count(credential_id=credential.raw_id)
 
       request.session['credential_id'] = credential.id
@@ -165,28 +177,6 @@ def api_send_email():
 
 # @check_device_id
 def api_ping(request):
-    # Znajdź użytkownika po adresie e-mail
-    user_email = "simple@adamszreiber.pl"
-
-    # # Utwórz nowe poświadczenie dla tego użytkownika
-    # new_passkey = WebAuthnCredential.objects.create(
-    #     username=user_email,  # Możesz ustawić username jako email użytkownika
-    #     credential_id=b'\x01\x02\x03\x04',  # Przykładowy identyfikator poświadczenia (binarny)
-    #     credential_public_key=b'\x01\x02\x03\x04\x05',  # Przykładowy klucz publiczny (binarny)
-    #     credential_type='public_key',  # Typ poświadczenia
-    #     aaguid='12345678-1234-1234-1234-123456789012',  # AAGUID (przykładowy)
-    #     transports=['usb', 'nfc'],  # Lista dostępnych transportów
-    #     is_discoverable=True,  # Możliwość wykrywania poświadczenia
-    #     sign_count=0,  # Początkowa liczba podpisów
-    #     authenticator_attachment='platform',  # Typ urządzenia (platforma)
-    #     public_key_algorithm=1,  # Przykładowy algorytm klucza publicznego
-    # )
-
-    # new_passkey.save()
-
-    credentials = WebAuthnCredential.objects.filter(username=user_email).first()
-    WebAuthnCredential.objects.increment_sign_count(credential_id=credentials.credential_id)
-
     return JsonResponse({'email':'abc' })
 
 

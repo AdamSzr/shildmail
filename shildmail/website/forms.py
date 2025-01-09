@@ -2,6 +2,7 @@ from django import forms
 
 from shildmail.models.user import User
 
+from django.core.exceptions import ValidationError
 class LoginForm(forms.Form):
     email = forms.CharField(
         max_length=150,
@@ -26,3 +27,46 @@ class LoginForm(forms.Form):
 
         cleaned_data['user'] = user
         return cleaned_data
+
+
+
+class RegisterForm(forms.Form):
+    username = forms.CharField(
+        max_length=150,
+        required=True,
+        widget=forms.TextInput(attrs={'placeholder': 'Username'}),
+        label="Nazwa użytkownika"
+    )
+    realname = forms.CharField(
+        max_length=150,
+        required=True,
+        widget=forms.TextInput(attrs={'placeholder': 'Real Name'}),
+        label="Imię i nazwisko"
+    )
+    password = forms.CharField(
+        required=True,
+        widget=forms.PasswordInput(attrs={'placeholder': 'Password'}),
+        label="Hasło"
+    )
+
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+
+        username = f"{username}@adamszreiber.pl"
+
+        return username
+
+    # def clean_realname(self):
+    #     realname = self.cleaned_data.get('realname')
+    #     if realname:
+    #         realname = realname.lower().replace(' ', '_') + '/'
+    #     return realname
+
+    def clean_password(self):
+        password = self.cleaned_data.get('password')
+        return f"{'{PLAIN}'}{password}"
+
+    def clean(self):
+        # W razie potrzeby możesz dodać ogólną walidację między polami tutaj.
+        return super().clean()
+
