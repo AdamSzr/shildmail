@@ -1,14 +1,23 @@
 <nav class="navbar bg-body-tertiary">
     <div class="container-fluid">
+        <!-- Logo lub marka -->
         <a href="/" class="navbar-brand">ShildMail</a>
-        <ul class="navbar-nav">
-            <li><a href="/" class="nav-link">Home</a></li>
-            <li><a href="/mail" class="nav-link">About</a></li>
-            <li><a href="/register-credentials" class="nav-link">Contact</a></li>
+
+        <!-- Linki nawigacyjne -->
+        <ul class="navbar-nav d-flex flex-row gap-4">
+            <li class="nav-item">
+                <a href="/" class="nav-link">Home</a>
+            </li>
+            <li class="nav-item">
+                <a href="/mail" class="nav-link">Nowy Email</a>
+            </li>
+            <li class="nav-item">
+                <a href="/register-credentials" class="nav-link">Dodaj urządzenie autoryzujące</a>
+            </li>
         </ul>
-    </div>
-    <div>
-        <button class="btn btn-outline-success" onclick='logout()'>Logout</button>
+
+        <!-- Przycisk Logout wyrównany do prawej -->
+        <button class="btn btn-outline-success ms-auto" onclick="logout()">Logout</button>
     </div>
 </nav>
 

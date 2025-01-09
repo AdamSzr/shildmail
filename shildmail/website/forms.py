@@ -34,18 +34,18 @@ class RegisterForm(forms.Form):
     username = forms.CharField(
         max_length=150,
         required=True,
-        widget=forms.TextInput(attrs={'placeholder': 'Username'}),
+        widget=forms.TextInput(attrs={'placeholder': 'Username','class': 'form-control'}),
         label="Nazwa użytkownika"
     )
     realname = forms.CharField(
         max_length=150,
         required=True,
-        widget=forms.TextInput(attrs={'placeholder': 'Real Name'}),
+        widget=forms.TextInput(attrs={'placeholder': 'Real Name','class': 'form-control'}),
         label="Imię i nazwisko"
     )
     password = forms.CharField(
         required=True,
-        widget=forms.PasswordInput(attrs={'placeholder': 'Password'}),
+        widget=forms.PasswordInput(attrs={'placeholder': 'Password','class': 'form-control'}),
         label="Hasło"
     )
 
@@ -75,12 +75,12 @@ class RegisterForm(forms.Form):
 class MailForm(forms.Form):
     to = forms.CharField(
         required=True,
-        widget=forms.TextInput(attrs={'placeholder': 'Adresat'}),
+        widget=forms.TextInput(attrs={'placeholder': 'Adresat','class': 'form-control'}),
         label="Do"
     )
     subject = forms.CharField(
         required=True,
-        widget=forms.TextInput(attrs={'placeholder': 'Temat'}),
+        widget=forms.TextInput(attrs={'placeholder': 'Temat','class': 'form-control'}),
         label="Temat"
     )
     content = forms.CharField(
@@ -90,5 +90,6 @@ class MailForm(forms.Form):
             'rows': 5,
             'cols': 40,
             'placeholder': 'Wprowadź opis...',
+            'class': 'form-control'
         }),
     )

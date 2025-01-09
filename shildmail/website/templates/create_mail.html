@@ -9,7 +9,39 @@
   <!-- Nagłówek -->
   {% include 'partials/header.html' %}
 
-  <h1>Nowa Wiadomość</h1>
+
+  <div class="d-flex justify-content-center align-items-center vh-100">
+    <div class="card shadow p-4" style="max-width: 500px; width: 100%;">
+        <h1 class="text-center mb-4">Nowa Wiadomość</h1>
+
+        <form method="post" action="/api/send-mail">
+            {% csrf_token %}
+            
+            <!-- Pole 'To' -->
+            <div class="mb-3">
+                {{ form.to.label_tag }}
+                {{ form.to}}
+            </div>
+
+            <!-- Pole 'Subject' -->
+            <div class="mb-3">
+                {{ form.subject.label_tag }}
+                {{ form.subject}}
+            </div>
+
+            <!-- Pole 'Content' -->
+            <div class="mb-3">
+                {{ form.content.label_tag }}
+                {{ form.content }}
+            </div>
+
+            <!-- Przycisk -->
+            <button type="submit" class="btn btn-primary w-100">Wyślij</button>
+        </form>
+    </div>
+</div>
+
+    {% comment %} <h1>Nowa Wiadomość</h1>
 
     <form method="post" action='/api/send-mail'>
         {% csrf_token %}
@@ -26,7 +58,7 @@
           {{ form.content }}
       </div>
         <button type="submit">Wyślij</button>
-    </form>
+    </form> {% endcomment %}
 
     {% if messages %}
           <div >
