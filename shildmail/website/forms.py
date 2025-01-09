@@ -85,6 +85,10 @@ class MailForm(forms.Form):
     )
     content = forms.CharField(
         required=True,
-        widget=forms.PasswordInput(attrs={'placeholder': 'Treść'}),
-        label="Wiadomość"
+        label="Wiadomość",
+        widget= forms.Textarea(attrs={
+            'rows': 5,
+            'cols': 40,
+            'placeholder': 'Wprowadź opis...',
+        }),
     )

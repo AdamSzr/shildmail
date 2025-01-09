@@ -1,0 +1,20 @@
+<nav class="navbar bg-body-tertiary">
+    <div class="container-fluid">
+        <a href="/" class="navbar-brand">ShildMail</a>
+        <ul class="navbar-nav">
+            <li><a href="/" class="nav-link">Home</a></li>
+            <li><a href="/mail" class="nav-link">About</a></li>
+            <li><a href="/register-credentials" class="nav-link">Contact</a></li>
+        </ul>
+    </div>
+    <div>
+        <button class="btn btn-outline-success" onclick='logout()'>Logout</button>
+    </div>
+</nav>
+
+<script>
+    function logout(){
+        fetch('/api/logout', {redirect: 'follow'})
+        .then(response => response.redirected && (window.location.href = response.url) )
+    }
+</script>

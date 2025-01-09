@@ -132,7 +132,7 @@ def api_register_webauthn_device(request):
 
       new_passkey.save()
 
-      return JsonResponse({"added":True})
+      return redirect('second-factor-authentication')
 
 def api_webauthn(request):
     if request.method == 'GET':
@@ -171,7 +171,7 @@ def api_webauthn(request):
 
       request.session['credential_id'] = credential.id
 
-      return JsonResponse({"verified": True})
+      return redirect('home')
 
 def api_send_email(request:HttpRequest):
     if(request.method != 'POST'):

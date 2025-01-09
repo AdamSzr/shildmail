@@ -9,5 +9,5 @@ def webauthn_login_required(view_func):
             # Sprawdz czy user posiada taki device id
             return view_func(request, *args, **kwargs)  # Procesuj widok dalej
         else:
-            return redirect('/2fa')  # Przekieruj na stronę autoryzacji urządzenia
+            return redirect('second-factor-authentication')  # Przekieruj na stronę autoryzacji urządzenia
     return wrapper
