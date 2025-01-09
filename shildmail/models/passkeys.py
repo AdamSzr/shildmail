@@ -16,6 +16,13 @@ class WebAuthnCredentialManager(models.Manager):
         # Zaktualizowanie pola sign_count poprzez inkrementację
         return self.filter(credential_id=credential_id).update(sign_count=F('sign_count') + 1)
 
+    def update_sign_count(self, credential_id, count):
+        """
+        Ustawia nową wartość pola sign_count dla poświadczenia o danym credential_id.
+        """
+        # Zaktualizowanie pola sign_count bezpośrednio na podaną wartość
+        return self.filter(credential_id=credential_id).update(sign_count=count)
+
 
 class WebAuthnCredential(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

@@ -137,3 +137,18 @@ WEBAUTH_RP_ID = 'localhost' #the hostname (minus scheme and port) of the server 
 WEBAUTH_RP_NAME = 'Shild Mail' # human readable name of your server intended only for display
 
 WEBAUTH_ORIGIN = 'http://localhost:3000' #used for verifying assertions. Only authentication ceremonies occurring in this origin will validate
+
+IMAP_HOST = 'mail.adamszreiber.pl'
+IMAPS_PORT = 993
+
+
+
+SMTP_HOST = 'mail.adamszreiber.pl'
+SMTP_PORT = 587
+
+# Description: 	<not specified>
+# Server Name: 	mail.adamszreiber.pl
+# Port: 	587
+# User Name: 	dave@adamszreiber.pl
+# Authentication method: 	Normal password
+# Connection Security: 	STARTTLS

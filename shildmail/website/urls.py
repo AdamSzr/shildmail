@@ -14,5 +14,6 @@ urlpatterns = [
     path('2fa', views.second_factor_authentication, name='second-factor-authentication'),
     path('register', views.register, name='register'),
     path('register-credentials', views.register_credentials, name='register-credentials'),
+    path('mail', views.mail, name='create-mail'),
     path('test', views.test, name="test"),
 ]

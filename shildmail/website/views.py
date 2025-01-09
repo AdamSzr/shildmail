@@ -9,7 +9,7 @@ from django.contrib.auth import authenticate, login
 from django.contrib import messages
 
 from shildmail.imap.manager import imap_manager
-from shildmail.website.forms import LoginForm, RegisterForm
+from shildmail.website.forms import LoginForm, MailForm, RegisterForm
 from email.header import decode_header
 
 
@@ -17,9 +17,6 @@ def home(request):
     return render(request, 'home.html',{'name':'login'})
 
 def login(request):
-    if(request.user.is_authenticated):
-        return redirect('home')
-
     return render(request, 'login.html', {'form': LoginForm()})
 
 def second_factor_authentication(request):
@@ -41,6 +38,9 @@ def decode_mime_words(s):
         part.decode(charset or 'utf-8') if isinstance(part, bytes) else part
         for part, charset in decoded
     )
+
+def mail(request):
+    return render(request, 'create_mail.html', {'form': MailForm()})
 
 def test(request):
     # id = request.session.session_key

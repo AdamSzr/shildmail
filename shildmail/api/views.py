@@ -1,12 +1,14 @@
 import json
 from pyexpat.errors import messages
-from django.http import HttpResponseRedirect, JsonResponse, HttpResponseBadRequest
+from django.http import HttpRequest, HttpResponseRedirect, JsonResponse, HttpResponseBadRequest
 from django.shortcuts import redirect
 from django.urls import reverse
 from webauthn import generate_authentication_options, generate_registration_options, options_to_json, verify_authentication_response, verify_registration_response
+from shildmail.imap.IMAP_Adapter import IMAPAdapter
 from shildmail.models.passkeys import WebAuthnCredential
 from shildmail.models.user import User
 from shildmail.settings import WEBAUTH_ORIGIN, WEBAUTH_RP_ID, WEBAUTH_RP_NAME
+from shildmail.smtp.send_mail import send_mail
 from shildmail.website.forms import LoginForm, RegisterForm
 from django.contrib.auth import authenticate, login, logout
 from shildmail.imap.manager import imap_manager
@@ -20,7 +22,6 @@ from webauthn.helpers.structs import (
     PublicKeyCredentialType,
     AuthenticatorTransport,
 )
-
 
 def api_login(request):
     if request.method != 'POST':
@@ -42,7 +43,7 @@ def api_login(request):
 
         hasKeys = WebAuthnCredential.objects.filter(username=email).exists()
 
-        if(hasKeys): return redirect('2fa')
+        if(hasKeys): return redirect('second-factor-authentication')
         else: return redirect('register-credentials')
 
     else: return JsonResponse({'message':"Invalid credentials"}, status=400)
@@ -66,7 +67,7 @@ def api_register(request):
        realname=data['realname'],
        password=data['password'],
        maildir=data['realname'].lower().replace(' ', '_') + '/'
-       )
+    )
     print(user)
     return JsonResponse({'result':True})
 
@@ -172,11 +173,15 @@ def api_webauthn(request):
 
       return JsonResponse({"verified": True})
 
-def api_send_email():
-    return JsonResponse({'message': 'API Send mail'})
+def api_send_email(request:HttpRequest):
+    if(request.method != 'POST'):
+      return JsonResponse({'result':False, 'message': 'wrong http method'})
+
+    if(send_mail(request)): return JsonResponse({'result':True})
+    else: return JsonResponse({ 'result':False, 'message': 'SMTP Error'})
 
 # @check_device_id
-def api_ping(request):
+def api_ping(request:HttpRequest):
     return JsonResponse({'email':'abc' })
 
 

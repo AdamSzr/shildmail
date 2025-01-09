@@ -70,3 +70,21 @@ class RegisterForm(forms.Form):
         # W razie potrzeby możesz dodać ogólną walidację między polami tutaj.
         return super().clean()
 
+
+
+class MailForm(forms.Form):
+    to = forms.CharField(
+        required=True,
+        widget=forms.TextInput(attrs={'placeholder': 'Adresat'}),
+        label="Do"
+    )
+    subject = forms.CharField(
+        required=True,
+        widget=forms.TextInput(attrs={'placeholder': 'Temat'}),
+        label="Temat"
+    )
+    content = forms.CharField(
+        required=True,
+        widget=forms.PasswordInput(attrs={'placeholder': 'Treść'}),
+        label="Wiadomość"
+    )
