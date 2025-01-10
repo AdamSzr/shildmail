@@ -6,60 +6,113 @@
 
   <!-- Nagłówek -->
   {% include 'partials/header.html' %}
-
-  <h1>Email list</h1>
+  {% load custom_filters %}
 
 
   <div class="container mt-5">
-    <h1 class="text-center">Informacje o E-mailu</h1>
-    
     <div class="card mb-4">
         <div class="card-body">
-            <h2>E-mail użytkownika</h2>
-            <p class="h5">{{ email }}</p>
+            <h2>{{ email }} </h2>
         </div>
     </div>
 
-    <div class="card mb-4">
-        <div class="card-body">
-            <h2>Foldery</h2>
-            <ul class="list-group">
-                {% for mailbox in mailboxes %}
-                    <li class="list-group-item">{{ mailbox }}</li>
-                {% endfor %}
-            </ul>
-        </div>
-    </div>
-
-    <div class="card mb-4">
-        <div class="card-body">
-            <h2>Identyfikatory wiadomości</h2>
-            <ul class="list-group">
-                {% for message_id in message_ids %}
-                    <li class="list-group-item">{{ message_id }}</li>
-                {% endfor %}
-            </ul>
-        </div>
-    </div>
-
-    <div class="card">
-        <div class="card-body">
-            <h2>Wiadomości</h2>
-            {% for message in messages %}
-                <div class="mb-4">
-                    <h3>Wiadomość {{ loop.index }}</h3>
-                    <div class="border p-3 mb-2">
-                        <p><strong>Temat:</strong> {{ message.subject }}</p>
-                        <p><strong>Od:</strong> {{ message.sender }}</p>
-                        <p><strong>Do:</strong> {{ message.recipient }}</p>
-                        <p><strong>Data wysłania:</strong> {{ message.date_sent }}</p>
-                        <p><strong>Treść:</strong> {{ message.content }}</p>
-                        <p><strong>Message ID:</strong> {{ message.message_id }}</p>
+    <div class="container mt-5">
+        <div class="row">
+            <!-- Kolumna 1: Foldery -->
+            <div class="col-2 border-end">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">Foldery</h4>
+                    </div>
+                    <div class="card-body p-2">
+                        <ul class="list-group">
+                            {% for mailbox in mailboxes %}
+                                <li class="list-group-item">
+                                    <a  href="?mailbox={{ mailbox }}{{ request.GET.urlencode|remove_mailbox }}" class="text-decoration-none text-dark">
+                                        {{ mailbox }}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
                     </div>
                 </div>
-            {% endfor %}
+            </div>
+            <!-- Kolumna 2: Lista wiadomości -->
+            <div class="col-4 border-end">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">Wiadomości</h4>
+                    </div>
+                    <div class="card-body p-2">
+                        <ul class="list-group">
+                            {% for message_id, message in messages.items %}
+                                <li class="list-group-item">
+                                    <a href="?{{ request.GET.urlencode|remove_message_id }}&message_id={{ message_id }}" class="text-decoration-none text-dark">
+                                        <strong>Temat:</strong> {{ message.subject }}<br>
+                                        <small class="text-muted">
+                                            <strong>Od:</strong> {{ message.sender }}<br>
+                                            <strong>Data:</strong> {{ message.date_sent }}
+                                        </small>
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kolumna 3: Szczegóły wiadomości -->
+            <div class="col-6 d-flex flex-column">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">Szczegóły wiadomości</h4>
+                    </div>
+                    <div class="card-body">
+                        {% if selected_message %}
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">{{ selected_message.subject }}</h5>
+                            </div>
+                            <div class="card-body">
+                                <!-- Wiersz dla "Od:" -->
+                                <div class="row mb-2">
+                                    <div class="col-3"><strong>Od:</strong></div>
+                                    <div class="col">{{ selected_message.sender }}</div>
+                                </div>
+
+                                <!-- Wiersz dla "Do:" -->
+                                <div class="row mb-2">
+                                    <div class="col-3"><strong>Do:</strong></div>
+                                    <div class="col">{{ selected_message.recipient }}</div>
+                                </div>
+
+                                <!-- Wiersz dla "Data wysłania:" -->
+                                <div class="row mb-2">
+                                    <div class="col-3"><strong>Data wysłania:</strong></div>
+                                    <div class="col">{{ selected_message.date_sent }}</div>
+                                </div>
+
+                                <!-- Wiersz dla "Treść:" -->
+                                <div class="row mb-2">
+                                    <div class="col-3"><strong>Treść:</strong></div>
+                                    <div class="col">{{ selected_message.content }}</div>
+                                </div>
+
+                                <!-- Przycisk odpowiedzi po prawej stronie -->
+                                <div class="text-end mt-3">
+                                    <a href="/reply?{{ request.GET.urlencode }}" target="_blank" class="btn btn-secondary">Odpowiedz</a>
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
+                            <p class="text-muted">Kliknij wiadomość, aby zobaczyć szczegóły</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-</div>
+
+    
 
 {% endblock %}

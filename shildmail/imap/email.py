@@ -1,11 +1,24 @@
 from email.message import Message
 from email import message_from_bytes
 from email.header import decode_header
+import random
 from typing import Dict
 from email.message import Message
 
 
 class Email:
+    counter = 0  # Zmienna statyczna (klasowa)
+
+    # def __init__(self):
+    #     self.raw = b''  # Przechowujemy całą surową wiadomość
+    #     self.subject = 'Sprawdź status swojej płatności'
+    #     self.sender = 'service@payu.com'
+    #     self.recipient = 'simple@adamszreiber.pl'
+    #     self.date_sent = 'Thu, 09 Jan 2025 13:24:56 -0800'
+    #     self.message_id = '<67803ea8.a70a0220.1f1e4b.c845SMTPIN_ADDED_MISSING@mx.google.com>'
+    #     self.content = 'w związku ze zbliżającym się terminem przygotowania informacji podatkowej PIT-8C prosimy o sprawdzenie, czy Państwa dane osobowe i adresowe posiadane przez XTB S.A. są aktualne.'
+
+
     def __init__(self, raw_msg):
         self.raw = raw_msg  # Przechowujemy całą surową wiadomość
         self.subject = self._get_subject()
@@ -39,3 +52,15 @@ class Email:
                 content = "Błąd dekodowania treści"
 
         return content
+    
+    def to_dict(self):
+        Email.counter+=1
+        return {
+            'raw':self.raw,
+            'subject':self.subject,
+            'sender':self.sender,
+            'recipient':self.recipient,
+            'date_sent':self.date_sent,
+            'message_id':self.message_id,
+            'content':self.content,
+        }

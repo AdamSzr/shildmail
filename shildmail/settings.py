@@ -146,9 +146,4 @@ IMAPS_PORT = 993
 SMTP_HOST = 'mail.adamszreiber.pl'
 SMTP_PORT = 587
 
-# Description: 	<not specified>
-# Server Name: 	mail.adamszreiber.pl
-# Port: 	587
-# User Name: 	dave@adamszreiber.pl
-# Authentication method: 	Normal password
-# Connection Security: 	STARTTLS
+APP_MODE =  'test' # dev

@@ -6,7 +6,7 @@ from webauthn import generate_authentication_options, generate_registration_opti
 from shildmail.imap.manager import imap_manager
 from shildmail.models.passkeys import WebAuthnCredential
 from shildmail.models.user import User
-from shildmail.settings import WEBAUTH_ORIGIN, WEBAUTH_RP_ID, WEBAUTH_RP_NAME
+from shildmail.settings import WEBAUTH_ORIGIN, WEBAUTH_RP_ID, WEBAUTH_RP_NAME, APP_MODE
 from shildmail.smtp.send_mail import send_mail
 from shildmail.website.forms import LoginForm, RegisterForm
 from django.contrib.auth import authenticate, login, logout
@@ -42,7 +42,8 @@ def api_login(request):
 
         hasKeys = WebAuthnCredential.objects.filter(username=email).exists()
 
-        imap_manager.create_connection(email,form.cleaned_data['password'])
+        if(APP_MODE!='dev'):
+          imap_manager.create_connection(email,form.cleaned_data['password'])
 
         if(hasKeys): return redirect('second-factor-authentication')
         else: return redirect('register-credentials')
@@ -74,7 +75,7 @@ def api_register(request):
 
 
 def api_logout(request):
-    imap_manager.close_connection(request.session.session_key)
+    imap_manager.close_connection(request.user.email)
     logout(request)  # Wylogowuje użytkownika
     return HttpResponseRedirect(reverse('login'))
 

@@ -31,13 +31,40 @@ class IMAPAdapter:
         Zamyka połączenie z serwerem IMAP.
         """
         if self.connection:
-            self.connection.close()
+            if(self.connection.state == 'SELECTED'):
+               self.connection.close()
+            
             self.connection.logout()
             self.connection = None
 
     def check_connection(self):
         if not self.connection:
             raise RuntimeError("Not connected to IMAP server.")
+
+    def get_mailboxes(self) -> List[str]:
+        """
+        Pobiera listę folderów (mailboxów) z serwera IMAP.
+        """
+        self.check_connection()
+
+        if(self.mailboxes):
+            return self.mailboxes
+
+        folder_list = []
+        status, folders = self.connection.list()
+
+        if not status == 'OK':
+            return folder_list
+
+        for folder in folders:
+            # Foldery są zwracane w formacie b'(flags) "delimiter" folder_name'
+            parts = folder.decode().split(' ')
+            folder_name = parts[-1].strip('"')
+            folder_list.append(folder_name)
+
+        self.mailboxes = folder_list
+
+        return folder_list
 
     def select_mailbox(self,mailbox:str):
         if(not self.mailboxes):
@@ -72,16 +99,7 @@ class IMAPAdapter:
         self.messages_ids[self.mailbox] = mess_ids
         return mess_ids
 
-    def get_messages_for(self, mailbox:str) -> List[Email]:
-        if mailbox not in self.mailboxes:
-            raise Exception(f'Invalid mailbox [{mailbox}]', self.mailboxes)
-          # Pobieramy listę message_id z danego folderu
-        message_ids = self.messages_ids[mailbox]
-        
-        # Tworzymy listę obiektów Email dla danej listy message_id
-        emails = [self.messages[message_id] for message_id in message_ids if message_id in self.messages]
-        
-        return emails
+
 
     def get_message(self, message_id: str) -> Email:
         """Pobieranie treści wiadomości na podstawie message_id"""
@@ -94,7 +112,7 @@ class IMAPAdapter:
 
         if not status == 'OK':
             raise Exception(f"Nie udało się pobrać wiadomości o ID: {message_id}")
-        
+
         for response_part in data:
             if isinstance(response_part, tuple):
                 # Parsowanie wiadomości i tworzenie obiektu Email
@@ -106,27 +124,33 @@ class IMAPAdapter:
 
                 return email_obj
 
-    def get_mailboxes(self) -> List[str]:
+
+    def get_messages_for(self, mailbox:str) -> List[Email]:
+        if mailbox not in self.mailboxes:
+            raise Exception(f'Invalid mailbox [{mailbox}]', self.mailboxes)
+          # Pobieramy listę message_id z danego folderu
+        message_ids = self.messages_ids[mailbox]
+
+        mails = {}
+
+        for message_id in message_ids:
+            mails[message_id] = self.get_message(message_id)
+
+        return mails
+
+
+    def get_messages(self, message_ids: list[str]) -> Dict[str, Email]:
         """
-        Pobiera listę folderów (mailboxów) z serwera IMAP.
+        Pobiera wiadomości dla listy message_ids i zwraca słownik z message_id jako kluczami i obiektami Email jako wartościami.
         """
-        self.check_connection()
 
-        if(self.mailboxes):
-            return self.mailboxes
+        # Przechodzimy przez listę identyfikatorów wiadomości
+        for message_id in message_ids:
+            try:
+                # Pobieramy wiadomość za pomocą istniejącej metody
+                self.get_message(message_id)
+            except Exception as e:
+                # Obsługuje błąd, jeśli wiadomości nie uda się pobrać
+                print(f"Błąd podczas pobierania wiadomości {message_id}: {e}")
 
-        folder_list = []
-        status, folders = self.connection.list()
-
-        if not status == 'OK':
-            return folder_list
-
-        for folder in folders:
-            # Foldery są zwracane w formacie b'(flags) "delimiter" folder_name'
-            parts = folder.decode().split(' ')
-            folder_name = parts[-1].strip('"')
-            folder_list.append(folder_name)
-
-        self.mailboxes = folder_list
-
-        return folder_list
+        return self.messages

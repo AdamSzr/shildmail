@@ -44,7 +44,7 @@ class IMAPManager:
         connection = self.connections.pop(email, None)
         if connection:
             try:
-                connection.logout()
+                connection.disconnect()
                 logger.info(f"Połączenie IMAP zamknięte dla użytkownika {email}")
             except Exception as e:
                 logger.error(f"Nie udało się zamknąć połączenia IMAP dla użytkownika {email}: {e}")

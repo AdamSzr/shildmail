@@ -17,9 +17,10 @@ from email.header import decode_header
 from shildmail.website.page_props import HomePageProps
 
 
+
 def home(request):
-    props = HomePageProps(request)
-    print(props)
+    # props = HomePageProps(request)
+    # print(props)
 
 #     email = 'simple@adamszreiber.pl'
 #     mailboxes = ['Sent', 'Trash', 'INBOX']
@@ -51,7 +52,7 @@ def home(request):
 #         'message_ids': message_ids,
 #         'messages': messages
 #     })
-
+    props = HomePageProps(request)
     return render(request, 'home.html',props.to_dict())
 
 def login(request):
@@ -81,7 +82,9 @@ def mail(request):
     return render(request, 'create_mail.html', {'form': MailForm()})
 
 
-def mail_detail(request, id):
+def mail_reply(request):
+    message_id= request.GET.get('message_id')
+    mailbox = request.GET.get('mailbox')
     # Pobranie wiadomości z bazy danych
     mail = {
         'subject':'subject',
