@@ -146,4 +146,4 @@ IMAPS_PORT = 993
 SMTP_HOST = 'mail.adamszreiber.pl'
 SMTP_PORT = 587
 
-APP_MODE =  'test' # dev
+APP_MODE = 'test' #'test' # dev

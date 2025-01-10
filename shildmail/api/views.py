@@ -35,14 +35,13 @@ def api_login(request):
     password = "{PLAIN}" + form.cleaned_data['password']
     user = authenticate(request, email=email, password=password)
 
-    print(user)
     if(user):  # Zapisanie użytkownika w sesji
         login(request=request, user=user)
         request.session['email'] = email
 
         hasKeys = WebAuthnCredential.objects.filter(username=email).exists()
 
-        if(APP_MODE!='dev'):
+        if(APP_MODE != 'dev'):
           imap_manager.create_connection(email,form.cleaned_data['password'])
 
         if(hasKeys): return redirect('second-factor-authentication')
@@ -70,7 +69,7 @@ def api_register(request):
        password=data['password'],
        maildir=data['realname'].lower().replace(' ', '_') + '/'
     )
-    print(user)
+    
     return JsonResponse({'result':True})
 
 

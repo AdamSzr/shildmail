@@ -47,7 +47,6 @@ class User(AbstractBaseUser):
         super().save(*args, **kwargs)
 
     def check_password(self,passw):
-       print(self.password, passw)
        return  self.password == passw
 
     def to_dict(self):

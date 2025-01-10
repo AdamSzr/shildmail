@@ -20,21 +20,13 @@
 
   <div class="d-flex flex-column justify-content-center align-items-center vh-100">
     <!-- Nagłówek -->
-    <h1 class="mb-4 text-center">Second Factor Authentication</h1>
+    <h1 class="mb-4 text-center">Wymagana podwójna autoryzacja</h1>
 
     <!-- Przycisk Autoryzacji -->
     <button id="auth" class="btn btn-primary btn-lg mb-3" onclick="device_auth()">
         Autoryzuj
     </button>
 </div>
-
-  {% comment %} <h1>Second Factor Authentication</h1>
-  <button id='auth' onclick='device_auth()' >
-    Autoryzuj
-  </button>
-
-  <a class='btn' href='/register-credentials'>Dodaj authenticator</a>
- {% endcomment %}
 
   <script>
      async function device_auth() {

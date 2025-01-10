@@ -17,5 +17,4 @@ urlpatterns = [
     path('register-credentials', login_required(views.register_credentials), name='register-credentials'),
     path('mail', webauthn_login_required(login_required(views.mail)), name='create-mail'),
     path('reply', webauthn_login_required(login_required( (views.mail_reply))), name='mail_reply'),
-    path('test', views.test, name="test"),
 ]
