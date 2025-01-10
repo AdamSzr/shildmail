@@ -16,5 +16,6 @@ urlpatterns = [
     path('register', views.register, name='register'),
     path('register-credentials', login_required(views.register_credentials), name='register-credentials'),
     path('mail', webauthn_login_required(login_required(views.mail)), name='create-mail'),
+    path('mail/<int:id>/', webauthn_login_required(login_required( (views.mail_detail))), name='mail_detail'),
     path('test', views.test, name="test"),
 ]

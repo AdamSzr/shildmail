@@ -9,8 +9,6 @@ from shildmail.website.forms import MailForm
 
 def send_mail(request:HttpRequest) -> bool:
     user = request.user
-    print(user.password)
-    print(user.email)
 
     mail_form = MailForm(request.POST)
     if(not mail_form.is_valid()):

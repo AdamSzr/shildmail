@@ -1,17 +1,16 @@
 import json
-from pyexpat.errors import messages
 from django.http import HttpRequest, HttpResponseRedirect, JsonResponse, HttpResponseBadRequest
 from django.shortcuts import redirect
 from django.urls import reverse
 from webauthn import generate_authentication_options, generate_registration_options, options_to_json, verify_authentication_response, verify_registration_response
-from shildmail.imap.IMAP_Adapter import IMAPAdapter
+from shildmail.imap.manager import imap_manager
 from shildmail.models.passkeys import WebAuthnCredential
 from shildmail.models.user import User
 from shildmail.settings import WEBAUTH_ORIGIN, WEBAUTH_RP_ID, WEBAUTH_RP_NAME
 from shildmail.smtp.send_mail import send_mail
 from shildmail.website.forms import LoginForm, RegisterForm
 from django.contrib.auth import authenticate, login, logout
-from shildmail.imap.manager import imap_manager
+
 from webauthn.helpers import (
     parse_registration_credential_json,
     parse_authentication_credential_json
@@ -42,6 +41,8 @@ def api_login(request):
         request.session['email'] = email
 
         hasKeys = WebAuthnCredential.objects.filter(username=email).exists()
+
+        imap_manager.create_connection(email,form.cleaned_data['password'])
 
         if(hasKeys): return redirect('second-factor-authentication')
         else: return redirect('register-credentials')

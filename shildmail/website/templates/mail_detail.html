@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+
+  <!-- Nagłówek -->
+  {% include 'partials/header.html' %}
+
+
+  <div class="container my-5">
+    <div class="card shadow-lg">
+        <div class="card-header bg-primary text-white">
+            <h3 class="card-title text-center">Temat: {{ mail.subject }}</h3>
+        </div>
+        <div class="card-body">
+            <!-- Wyświetlanie szczegółów wiadomości -->
+            <p><strong>Od:</strong> {{ mail.sender }}</p>
+            <p><strong>Do:</strong> {{ mail.recipient }}</p>
+            <p><strong>Treść wiadomości:</strong></p>
+            <div class="border p-3 mb-4" style="white-space: pre-wrap;">{{ mail.content }}</div>
+            {% comment %} <p><strong>Data wysłania:</strong> {{ mail.date_sent|date:"d-m-Y H:i" }}</p> {% endcomment %}
+        </div>
+        <div class="card-footer text-center">
+            <!-- Link do odpowiedzi na wiadomość -->
+            <a href="/reply/{{ mail.message_id }}" class="btn btn-info">Odpowiedz na wiadomość</a>
+
+            <button class="btn btn-secondary" onclick="goBack()">Powrót</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function goBack() {
+        window.history.back();
+    }
+</script>
+
+{% endblock %}

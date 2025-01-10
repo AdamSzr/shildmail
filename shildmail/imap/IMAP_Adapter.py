@@ -1,19 +1,23 @@
 from imaplib import IMAP4_SSL
 import email
-from email.header import decode_header
 from typing import List, Dict, Optional
 
+from shildmail.imap.email import Email
 from shildmail.settings import IMAP_HOST, IMAPS_PORT
-
-
 
 class IMAPAdapter:
     def __init__(self, username: str, password: str):
         self.username = username
+        self.email = username
         self.password = password
-        self.mailbox: str|None = None
+        self.raw_password = password.replace('{PLAIN}','')
         self.connection: IMAP4_SSL | None = None
+        self.mailbox: str | None = None
+
         self.mailboxes: List[str] | None = None
+        self.messages_ids: Dict[ str, List[str]] = {}
+        self.messages: Dict[str, Email] = {}
+
 
     def connect(self):
         """
@@ -35,89 +39,74 @@ class IMAPAdapter:
         if not self.connection:
             raise RuntimeError("Not connected to IMAP server.")
 
+    def select_mailbox(self,mailbox:str):
+        if(not self.mailboxes):
+            raise Exception('First run get_folders function')
 
-    def _decode_header(self, header: str) -> str:
-        """
-        Dekoduje nagłówki wiadomości e-mail, np. tytuły lub nadawcę.
-        """
-        decoded_header = decode_header(header)
-        decoded_parts = []
-        for part, encoding in decoded_header:
-            if isinstance(part, bytes):
-                decoded_parts.append(part.decode(encoding or "utf-8"))
-            else:
-                decoded_parts.append(part)
-        return "".join(decoded_parts)
+        if mailbox not in self.mailboxes:
+            return False
 
-    def get_messages(self) -> List[Dict[str, str]]:
-        """
-        Zwraca listę wiadomości z datą, tytułem i nadawcą.
-        """
-        self.check_connection()
+        if self.mailbox == mailbox:
+            return True
 
-        status, messages = self.connection.search(None, "ALL")
-        if status != "OK":
-            return []
+        status, data= self.connection.select(mailbox)
+        success = (status == 'OK')
 
-        messages_list = []
-        for msg_id in messages[0].split():
-            status, msg_data = self.connection.fetch(msg_id, "(RFC822)")
-            if status != "OK":
-                continue
+        if success:
+            self.mailbox = mailbox
 
-            raw_email = msg_data[0][1]
-            email_message = email.message_from_bytes(raw_email)
+        return success
 
-            # Dekodowanie pól
-            date = email_message.get("Date")
-            subject = self._decode_header(email_message.get("Subject"))
-            from_ = self._decode_header(email_message.get("From"))
+    def get_message_ids(self):
+        if not self.mailbox:
+             raise Exception('First run select the mailbox')
 
-            messages_list.append({
-                "date": date,
-                "subject": subject,
-                "from": from_,
-                "id": msg_id.decode("utf-8")
-            })
+        if self.mailbox in self.messages_ids:
+            return self.messages_ids[self.mailbox]
 
-        return messages_list
+        status, data = self.connection.search(None,'ALL')
+        if not status == 'OK':
+            raise Exception('failed during loading messages_ids')
 
-    def get_message(self, msg_id: str) -> Optional[Dict[str, str]]:
-        """
-        Zwraca szczegóły wiadomości o podanym ID.
-        """
-        self.check_connection()
+        mess_ids = data[0].decode('utf-8').split()
+        self.messages_ids[self.mailbox] = mess_ids
+        return mess_ids
 
-        status, msg_data = self.connection.fetch(msg_id, "(RFC822)")
-        if status != "OK":
-            return None
+    def get_messages_for(self, mailbox:str) -> List[Email]:
+        if mailbox not in self.mailboxes:
+            raise Exception(f'Invalid mailbox [{mailbox}]', self.mailboxes)
+          # Pobieramy listę message_id z danego folderu
+        message_ids = self.messages_ids[mailbox]
+        
+        # Tworzymy listę obiektów Email dla danej listy message_id
+        emails = [self.messages[message_id] for message_id in message_ids if message_id in self.messages]
+        
+        return emails
 
-        raw_email = msg_data[0][1]
-        email_message = email.message_from_bytes(raw_email)
+    def get_message(self, message_id: str) -> Email:
+        """Pobieranie treści wiadomości na podstawie message_id"""
+        # Sprawdzenie, czy wiadomość już została pobrana
+        if message_id in self.messages:
+            return self.messages[message_id]
 
-        # Dekodowanie pól
-        date = email_message.get("Date")
-        subject = self._decode_header(email_message.get("Subject"))
-        message_id = email_message.get("Message-ID")
-        content = ""
+        # Pobieranie wiadomości
+        status, data = self.connection.fetch(message_id, "(RFC822)")
 
-        # Pobranie treści wiadomości
-        if email_message.is_multipart():
-            for part in email_message.walk():
-                if part.get_content_type() == "text/plain":
-                    content = part.get_payload(decode=True).decode(part.get_content_charset() or "utf-8")
-                    break
-        else:
-            content = email_message.get_payload(decode=True).decode(email_message.get_content_charset() or "utf-8")
+        if not status == 'OK':
+            raise Exception(f"Nie udało się pobrać wiadomości o ID: {message_id}")
+        
+        for response_part in data:
+            if isinstance(response_part, tuple):
+                # Parsowanie wiadomości i tworzenie obiektu Email
+                raw_msg = email.message_from_bytes(response_part[1])
+                email_obj = Email(raw_msg)
 
-        return {
-            "date": date,
-            "subject": subject,
-            "content": content,
-            "message_id": message_id
-        }
+                # Przechowywanie wiadomości w słowniku
+                self.messages[message_id] = email_obj
 
-    def get_folders(self) -> List[str]:
+                return email_obj
+
+    def get_mailboxes(self) -> List[str]:
         """
         Pobiera listę folderów (mailboxów) z serwera IMAP.
         """
@@ -126,18 +115,18 @@ class IMAPAdapter:
         if(self.mailboxes):
             return self.mailboxes
 
-        status, folders = self.connection.list()
-        if status != "OK":
-            return []
-
         folder_list = []
+        status, folders = self.connection.list()
+
+        if not status == 'OK':
+            return folder_list
+
         for folder in folders:
             # Foldery są zwracane w formacie b'(flags) "delimiter" folder_name'
             parts = folder.decode().split(' ')
             folder_name = parts[-1].strip('"')
             folder_list.append(folder_name)
 
-        if(not self.mailboxes):
-            self.mailboxes = folder_list
+        self.mailboxes = folder_list
 
         return folder_list
