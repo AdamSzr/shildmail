@@ -124,7 +124,7 @@ def api_register_webauthn_device(request):
           credential_public_key=verification.credential_public_key,
           credential_type=verification.credential_type,
           aaguid=verification.aaguid,
-          transports=body_json['response'].get("transports", []),
+          transports=body_json['response'].get("transports", list),
           is_discoverable=True,
           sign_count=verification.sign_count,
           authenticator_attachment=body_json['authenticatorAttachment'],

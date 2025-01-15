@@ -61,7 +61,7 @@ def login(request):
 
 def second_factor_authentication(request):
     hasKeys = WebAuthnCredential.objects.filter(username=request.user.email).exists()
-    print(hasKeys)
+    # print(hasKeys)
     if(not hasKeys): return redirect('register-credentials')
 
     return render(request, 'second_factor_authentication.html')

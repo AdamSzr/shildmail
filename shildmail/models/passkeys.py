@@ -31,7 +31,7 @@ class WebAuthnCredential(models.Model):
     credential_public_key = models.BinaryField()
     credential_type = models.CharField(max_length=255)
     aaguid = models.CharField(max_length=255)
-    transports = ArrayField(models.TextField(max_length=255), default=[])
+    transports = ArrayField(models.TextField(max_length=255), default=list)
     is_discoverable = models.BooleanField(default=False)
     sign_count = models.IntegerField()
     registration_date = models.DateTimeField(auto_now_add=True)
