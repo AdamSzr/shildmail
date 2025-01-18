@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from shildmail.utils.password import generate_dovecot_password
 
 class UserManager(BaseUserManager):
     def create_user(self, email, password=None, realname=None, **extra_fields):
@@ -14,7 +15,7 @@ class UserManager(BaseUserManager):
         user = self.model(email=email, realname=realname, **extra_fields)
 
         # Automatyczna generacja `mail_dir` na podstawie `realname`
-        user.password = "{PLAIN}" + password
+        user.password = password
         user.mail_dir = realname.lower().replace(' ', '_')
 
         # Zapisujemy użytkownika

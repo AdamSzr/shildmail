@@ -1,28 +1,33 @@
 from imaplib import IMAP4_SSL
 import email
 from typing import List, Dict, Optional
-
+from logging import LoggerAdapter, getLogger, StreamHandler, Formatter,DEBUG
 from shildmail.imap.email import Email
 from shildmail.settings import IMAP_HOST, IMAPS_PORT
+
+logger = getLogger()
+logger.setLevel(DEBUG)
+
+handler = StreamHandler()
+formatter = Formatter('[%(asctime)s] IMAPAdapter %(message)s',  datefmt='%d/%b/%Y %H:%M:%S')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
 
 class IMAPAdapter:
     def __init__(self, username: str, password: str):
         self.username = username
-        self.email = username
         self.password = password
-        self.raw_password = password.replace('{PLAIN}','')
         self.connection: IMAP4_SSL | None = None
         self.mailbox: str | None = None
 
-        self.mailboxes: List[str] | None = None
-        self.messages_ids: Dict[ str, List[str]] = {}
-        self.messages: Dict[str, Email] = {}
+        self.storage = Message_Storage()
 
 
     def connect(self):
         """
         Łączy się z serwerem IMAP i loguje.
         """
+        logger.info(f"Creating connection")
         self.connection = IMAP4_SSL(IMAP_HOST, IMAPS_PORT)
         self.connection.login(self.username, self.password)
 
@@ -33,9 +38,11 @@ class IMAPAdapter:
         if self.connection:
             if(self.connection.state == 'SELECTED'):
                self.connection.close()
-            
+
             self.connection.logout()
             self.connection = None
+
+            logger.info(f"Bye bye")
 
     def check_connection(self):
         if not self.connection:
@@ -47,11 +54,13 @@ class IMAPAdapter:
         """
         self.check_connection()
 
-        if(self.mailboxes):
-            return self.mailboxes
+        mailboxes = self.storage.get_mailboxes()
+
+        if(mailboxes): return mailboxes
 
         folder_list = []
         status, folders = self.connection.list()
+        logger.info('Fetching mailboxes')
 
         if not status == 'OK':
             return folder_list
@@ -62,16 +71,15 @@ class IMAPAdapter:
             folder_name = parts[-1].strip('"')
             folder_list.append(folder_name)
 
-        self.mailboxes = folder_list
+        mailboxes = sorted(folder_list, key=lambda x: (x != "INBOX", x))
 
-        return folder_list
+        self.storage.add_mailboxes(mailboxes)
+
+        return mailboxes
 
     def select_mailbox(self,mailbox:str):
-        if(not self.mailboxes):
+        if(not self.storage.mailbox_exists(mailbox)):
             raise Exception('First run get_folders function')
-
-        if mailbox not in self.mailboxes:
-            return False
 
         if self.mailbox == mailbox:
             return True
@@ -79,8 +87,12 @@ class IMAPAdapter:
         status, data= self.connection.select(mailbox)
         success = (status == 'OK')
 
+        logger.info(f"Selecting {mailbox}")
+
         if success:
             self.mailbox = mailbox
+
+        self.storage.add_mailbox(mailbox)
 
         return success
 
@@ -88,28 +100,33 @@ class IMAPAdapter:
         if not self.mailbox:
              raise Exception('First run select the mailbox')
 
-        if self.mailbox in self.messages_ids:
-            return self.messages_ids[self.mailbox]
+        messages_ids = self.storage.get_message_ids(self.mailbox)
+
+        if messages_ids: return messages_ids
 
         status, data = self.connection.search(None,'ALL')
+        logger.info(f"{self.mailbox} - Fetching messages_ids")
+
         if not status == 'OK':
             raise Exception('failed during loading messages_ids')
 
         mess_ids = data[0].decode('utf-8').split()
-        self.messages_ids[self.mailbox] = mess_ids
-        return mess_ids
 
+        self.storage.add_message_ids( self.mailbox, mess_ids )
+
+        return mess_ids
 
 
     def get_message(self, message_id: str) -> Email:
         """Pobieranie treści wiadomości na podstawie message_id"""
         # Sprawdzenie, czy wiadomość już została pobrana
-        if message_id in self.messages:
-            return self.messages[message_id]
+        mess = self.storage.get_message(self.mailbox, message_id)
+        if mess: return mess
 
         # Pobieranie wiadomości
         status, data = self.connection.fetch(message_id, "(RFC822)")
 
+        logger.info(f"Fetching message: {message_id}")
         if not status == 'OK':
             raise Exception(f"Nie udało się pobrać wiadomości o ID: {message_id}")
 
@@ -120,16 +137,16 @@ class IMAPAdapter:
                 email_obj = Email(raw_msg)
 
                 # Przechowywanie wiadomości w słowniku
-                self.messages[message_id] = email_obj
+                self.storage.set_message(self.mailbox,message_id,email_obj)
 
                 return email_obj
 
 
     def get_messages_for(self, mailbox:str) -> List[Email]:
-        if mailbox not in self.mailboxes:
+        if  not self.storage.mailbox_exists(mailbox):
             raise Exception(f'Invalid mailbox [{mailbox}]', self.mailboxes)
-          # Pobieramy listę message_id z danego folderu
-        message_ids = self.messages_ids[mailbox]
+
+        message_ids = self.storage.get_message_ids(mailbox)
 
         mails = {}
 
@@ -154,3 +171,51 @@ class IMAPAdapter:
                 print(f"Błąd podczas pobierania wiadomości {message_id}: {e}")
 
         return self.messages
+
+
+class Message_Storage:
+    def __init__(self):
+        self.messages_storage: Dict[str, Dict[str, Email]] = {}
+
+    def get_mailboxes(self) -> List[str] | None:
+        if len(self.messages_storage.keys()) > 0:
+            return list(self.messages_storage.keys())
+        return None
+
+    def get_message_ids(self, mailbox):
+        if self.mailbox_exists(mailbox): return list(self.messages_storage[mailbox].keys())
+        else: return None
+
+    def get_message(self, mailbox, message_id: str):
+        if(self.mailbox_exists(mailbox)): return self.messages_storage[mailbox][message_id]
+        else: return None
+
+    def get_messages_for(self, mailbox:str):
+        if(not self.mailbox_exists()): return None
+
+        return list(self.messages_storage[mailbox].values())
+
+    def add_mailboxes(self, mailboxes: List[str]):
+        for mailbox in mailboxes:
+            self.add_mailbox(mailbox)
+
+    def mailbox_exists(self, mailbox:str):
+        return mailbox in self.messages_storage
+
+    def add_mailbox(self, mailbox:str):
+        if(not self.mailbox_exists(mailbox)):
+             self.messages_storage[mailbox] = {}
+
+    def add_message_ids(self, mailbox:str, message_id:str):
+        for id in message_id:
+            self.add_message_id(mailbox, id)
+
+    def add_message_id(self, mailbox:str, message_id:str):
+        self.add_mailbox(mailbox)
+
+        self.messages_storage[mailbox][message_id] = None
+
+    def set_message(self, mailbox:str, id:str, message:Email):
+        self.add_mailbox(mailbox)
+
+        self.messages_storage[mailbox][id] = message

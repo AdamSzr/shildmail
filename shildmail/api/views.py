@@ -1,16 +1,19 @@
 import json
+from typing import Dict
 from django.http import HttpRequest, HttpResponseRedirect, JsonResponse, HttpResponseBadRequest
 from django.shortcuts import redirect
 from django.urls import reverse
 from webauthn import generate_authentication_options, generate_registration_options, options_to_json, verify_authentication_response, verify_registration_response
+from shildmail.imap.email import Email
 from shildmail.imap.manager import imap_manager
 from shildmail.models.passkeys import WebAuthnCredential
 from shildmail.models.user import User
-from shildmail.settings import WEBAUTH_ORIGIN, WEBAUTH_RP_ID, WEBAUTH_RP_NAME, APP_MODE
+from shildmail.settings import WEBAUTH_ORIGIN, WEBAUTH_RP_ID, WEBAUTH_RP_NAME, CREATE_IMAP_CONNECTION
 from shildmail.smtp.send_mail import send_mail
+from shildmail.utils.password import generate_dovecot_password
 from shildmail.website.forms import LoginForm, RegisterForm
 from django.contrib.auth import authenticate, login, logout
-
+from hashlib import sha512
 from webauthn.helpers import (
     parse_registration_credential_json,
     parse_authentication_credential_json
@@ -20,6 +23,8 @@ from webauthn.helpers.structs import (
     PublicKeyCredentialDescriptor,
     PublicKeyCredentialType,
     AuthenticatorTransport,
+    PublicKeyCredentialCreationOptions,
+    PublicKeyCredentialRequestOptions
 )
 
 def api_login(request):
@@ -32,19 +37,22 @@ def api_login(request):
         return JsonResponse({'message':"Invalid credentials"}, status=400)
 
     email = form.cleaned_data['email']
-    password = "{PLAIN}" + form.cleaned_data['password']
-    user = authenticate(request, email=email, password=password)
 
-    if(user):  # Zapisanie użytkownika w sesji
+    password = form.cleaned_data['password']
+
+    user = authenticate(request, email=email, password=generate_dovecot_password(password))
+
+    if(user):
         login(request=request, user=user)
         request.session['email'] = email
+        request.session['raw_password'] = password
 
-        hasKeys = WebAuthnCredential.objects.filter(username=email).exists()
+        userHasKeys = WebAuthnCredential.objects.filter(username=email).exists()
 
-        if(APP_MODE != 'dev'):
-          imap_manager.create_connection(email,form.cleaned_data['password'])
+        if(CREATE_IMAP_CONNECTION):
+          imap_manager.create_connection( email, request.session['raw_password'] )
 
-        if(hasKeys): return redirect('second-factor-authentication')
+        if(userHasKeys): return redirect('second-factor-authentication')
         else: return redirect('register-credentials')
 
     else: return JsonResponse({'message':"Invalid credentials"}, status=400)
@@ -60,16 +68,20 @@ def api_register(request):
       return JsonResponse({'result':False, 'message': 'Form validatioin'})
 
     data = form.cleaned_data
+
     if User.objects.filter(email=data['username']).exists():
         return JsonResponse({'result':False, 'message': 'Email already taken'})
 
-    user = User.objects.create(
+
+    password = generate_dovecot_password(form.cleaned_data['password'])
+
+    User.objects.create(
        email=data['username'],
        realname=data['realname'],
-       password=data['password'],
+       password=password,
        maildir=data['realname'].lower().replace(' ', '_') + '/'
     )
-    
+
     return JsonResponse({'result':True})
 
 
@@ -82,7 +94,7 @@ def api_register_webauthn_device(request):
     if request.method == 'GET':
       credentials = WebAuthnCredential.objects.filter(username=request.user.email)
 
-      registration_options = generate_registration_options(
+      registration_options: PublicKeyCredentialCreationOptions = generate_registration_options(
         rp_id=WEBAUTH_RP_ID,
         rp_name=WEBAUTH_RP_NAME,
         user_name=request.user.email,
@@ -139,7 +151,7 @@ def api_webauthn(request):
     if request.method == 'GET':
       credentials = WebAuthnCredential.objects.filter(username=request.user.email)
 
-      authentication_options = generate_authentication_options(
+      authentication_options: PublicKeyCredentialRequestOptions = generate_authentication_options(
         rp_id=WEBAUTH_RP_ID,
         allow_credentials=[
             PublicKeyCredentialDescriptor(id=credential.credential_id)
@@ -168,7 +180,7 @@ def api_webauthn(request):
             credential_current_sign_count=db_credential.sign_count,
       )
 
-      WebAuthnCredential.objects.increment_sign_count(credential_id=credential.raw_id)
+      WebAuthnCredential.objects.update_sign_count(credential_id=credential.raw_id, count=verification.new_sign_count)
 
       request.session['credential_id'] = credential.id
 
@@ -183,6 +195,24 @@ def api_send_email(request:HttpRequest):
 
 # @check_device_id
 def api_ping(request:HttpRequest):
-    return JsonResponse({'email':'abc' })
+
+    # mess: Dict[str, Dict[str, str]] = {
+    #    'INBOX':{
+    #       '1':'mail-1',
+    #       '2':'mail-2'
+    #    }
+    # }
+
+    # # mess['Sent'] = {}
+
+    # mess['Sent']['1'] = 'sent-1'
+    # mess['Sent']['1'] = 'sent-2'
+
+    # selected_mailbox = 'INBOX'
+
+    # maildirs = list(mess.keys())
+
+    print(request.session['email'])
+    return JsonResponse(imap_manager.get_connection(request.session['email']))
 
 

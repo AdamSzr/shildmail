@@ -1,3 +1,4 @@
+from datetime import datetime
 from email.message import Message
 from email import message_from_bytes
 from email.header import decode_header
@@ -53,6 +54,13 @@ class Email:
 
         return content
     
+
+
+    def format_date(self, input_date:str):
+        parsed_date = datetime.strptime(input_date, "%a, %d %b %Y %H:%M:%S %z")
+
+        return parsed_date.strftime("%d.%m.%Y %H:%M")
+    
     def to_dict(self):
         Email.counter+=1
         return {
@@ -60,7 +68,7 @@ class Email:
             'subject':self.subject,
             'sender':self.sender,
             'recipient':self.recipient,
-            'date_sent':self.date_sent,
+            'date_sent':self.format_date(self.date_sent),
             'message_id':self.message_id,
             'content':self.content,
         }

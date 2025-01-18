@@ -9,6 +9,7 @@ from shildmail.website.forms import MailForm
 
 def send_mail(request:HttpRequest) -> bool:
     user = request.user
+    password = request.session['raw_password']
 
     mail_form = MailForm(request.POST)
     if(not mail_form.is_valid()):
@@ -27,7 +28,7 @@ def send_mail(request:HttpRequest) -> bool:
         # Połączenie z serwerem SMTP
         with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
             server.starttls()  # Rozpoczęcie szyfrowania TLS
-            server.login(user.email, user.password.replace('{PLAIN}',''))  # Logowanie do serwera
+            server.login(user.email, password)  # Logowanie do serwera
             server.sendmail(user.email, mail_data['to'], message.as_string())  # Wysłanie e-maila
             return True
     except Exception as e:

@@ -20,11 +20,11 @@
 
   <div class="d-flex flex-column justify-content-center align-items-center vh-100">
     <!-- Nagłówek -->
-    <h1 class="mb-4 text-center">Wymagana podwójna autoryzacja</h1>
+    <h1 class="mb-4 text-center">Podwójne uwierzytelnianie</h1>
 
     <!-- Przycisk Autoryzacji -->
     <button id="auth" class="btn btn-primary btn-lg mb-3" onclick="device_auth()">
-        Autoryzuj
+      Uwierzytelnij
     </button>
 </div>
 
@@ -33,29 +33,17 @@
       authenticationOptionsJSON = await fetch('/api/webauthn')
       .then(it => it.json())
 
-      console.log('AUTHENTICATION OPTIONS')
-      console.log(authenticationOptionsJSON)
 
-      const authResp = await SimpleWebAuthnBrowser.startAuthentication({
+      const assertionResp = await SimpleWebAuthnBrowser.startAuthentication({
         optionsJSON: authenticationOptionsJSON
       });
-
-      console.log('AUTHENTICATION RESPONSE');
-      console.log(authResp);
 
       const apiAuthVerResp = await fetch('/api/webauthn', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-CSRFToken':csrfToken },
-        body: JSON.stringify(authResp),
+        body: JSON.stringify(assertionResp),
       })
       .then(response => response.redirected && (window.location.href = response.url))
-  
-// # Simple Options
-// simple_authentication_options = generate_authentication_options(rp_id="example.com")
-// 
-// print("\n[Authentication Options - Simple]")
-// print(options_to_json(simple_authentication_options))
-
     }
   </script>
 

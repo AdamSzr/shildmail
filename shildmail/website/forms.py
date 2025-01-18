@@ -6,27 +6,21 @@ from django.core.exceptions import ValidationError
 class LoginForm(forms.Form):
     email = forms.CharField(
         max_length=150,
-        widget=forms.TextInput(attrs={'placeholder': 'Email', 'class': 'form-control'})
+        widget=forms.TextInput(attrs={'placeholder': '', 'class': 'form-control'})
     )
     password = forms.CharField(
-        widget=forms.PasswordInput(attrs={'placeholder': 'Password', 'class': 'form-control'})
+        widget=forms.PasswordInput(attrs={'placeholder': '', 'class': 'form-control'})
     )
 
-    def clean(self):
-        cleaned_data = super().clean()
-        email = cleaned_data.get("email")
-        password = "{PLAIN}"+ cleaned_data.get("password")
+    def clean_email(self):
+        username = self.cleaned_data.get('email')
+        postfix = '@adamszreiber.pl'
 
-        try:
-            user = User.objects.get(email=email)
-        except User.DoesNotExist:
-            raise forms.ValidationError("Invalid email or password")
+        # Sprawdzenie i dodanie postfixu, jeśli go brak
+        if not username.endswith(postfix):
+            username += postfix
 
-        if user.password != password:  # Porównanie plaintext
-            raise forms.ValidationError("Invalid email or password")
-
-        cleaned_data['user'] = user
-        return cleaned_data
+        return username
 
 
 
@@ -34,41 +28,32 @@ class RegisterForm(forms.Form):
     username = forms.CharField(
         max_length=150,
         required=True,
-        widget=forms.TextInput(attrs={'placeholder': 'Username','class': 'form-control'}),
+        widget=forms.TextInput(attrs={'placeholder': '','class': 'form-control'}),
         label="Nazwa użytkownika"
     )
+
     realname = forms.CharField(
         max_length=150,
         required=True,
-        widget=forms.TextInput(attrs={'placeholder': 'Real Name','class': 'form-control'}),
+        widget=forms.TextInput(attrs={'placeholder': '','class': 'form-control'}),
         label="Imię i nazwisko"
     )
+
     password = forms.CharField(
         required=True,
-        widget=forms.PasswordInput(attrs={'placeholder': 'Password','class': 'form-control'}),
+        widget=forms.PasswordInput(attrs={'placeholder': '','class': 'form-control'}),
         label="Hasło"
     )
 
     def clean_username(self):
         username = self.cleaned_data.get('username')
+        postfix = '@adamszreiber.pl'
 
-        username = f"{username}@adamszreiber.pl"
+        # Sprawdzenie i dodanie postfixu, jeśli go brak
+        if not username.endswith(postfix):
+            username += postfix
 
         return username
-
-    # def clean_realname(self):
-    #     realname = self.cleaned_data.get('realname')
-    #     if realname:
-    #         realname = realname.lower().replace(' ', '_') + '/'
-    #     return realname
-
-    def clean_password(self):
-        password = self.cleaned_data.get('password')
-        return f"{'{PLAIN}'}{password}"
-
-    def clean(self):
-        # W razie potrzeby możesz dodać ogólną walidację między polami tutaj.
-        return super().clean()
 
 
 

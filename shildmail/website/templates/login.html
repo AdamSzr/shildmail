@@ -4,11 +4,6 @@
     Login - ShildMail
 {% endblock %}
 
-{% block  scripts %}
-    <script src="https://unpkg.com/@simplewebauthn/browser/dist/bundle/index.umd.min.js"></script>
-
-{% endblock %}
-
 
 {% block content %}
 
@@ -24,13 +19,13 @@
                     {{ form.email.label_tag }}
                     {{ form.email }}
                 </div>
-                
+
                 <!-- Pole Hasło -->
                 <div class="mb-3">
                     {{ form.password.label_tag }}
                     {{ form.password }}
                 </div>
-                
+
                 <!-- Przycisk -->
                 <button type="submit" class="btn btn-primary w-100">Login</button>
             </form>
@@ -49,31 +44,4 @@
     </div>
 </div>
 
-    {% comment %} <h1>Login</h1>
-
-    <div class="container mt-5">
-        <h2>Login</h2>
-        <form method="post" action='/api/login'>
-            {% csrf_token %}
-            <div >
-                {{ form.email.label_tag }}
-                {{ form.email }}
-            </div>
-            <div >
-                {{ form.password.label_tag }}
-                {{ form.password }}
-            </div>
-            <button type="submit" >Login</button>
-        </form>
-
-        {% if messages %}
-            <div>
-                {% for message in messages %}
-                    <div>
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            </div>
-        {% endif %}
-    </div> {% endcomment %}
 {% endblock %}

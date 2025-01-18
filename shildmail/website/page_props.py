@@ -2,6 +2,8 @@
 from django.http import HttpRequest
 from shildmail.imap.email import Email
 from shildmail.imap.manager import imap_manager
+from datetime import datetime
+
 
 class HomePageProps:
     def __init__(self, request):
@@ -40,7 +42,7 @@ class HomePageProps:
             'messages': {key: value.to_dict() for key, value in self.messages.items()},
 
             'selected_mailbox':self.mailbox,
-            'selected_message': self.selected_message,
+            'selected_message': self.selected_message.to_dict() if self.selected_message else None,
         }
 
     def mock(self,request:HttpRequest):

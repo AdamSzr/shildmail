@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent
 SECRET_KEY = 'django-insecure-f$e*aslx6zbwbf$sxeg(xr&fm5=5m^v7+barb3em-)zl8dq%p-'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['192.168.1.22', 'localhost', '127.0.0.1']
 LOGIN_URL= '/login'
@@ -133,11 +133,8 @@ AUTHENTICATION_BACKENDS = [
     # 'django.contrib.auth.backends.ModelBackend',           # Domyślny backend Django
 ]
 
-WEBAUTH_RP_ID = 'adamszreiber.pl' #the hostname (minus scheme and port) of the server running your Django app
-
 WEBAUTH_RP_NAME = 'Shild Mail' # human readable name of your server intended only for display
 
-WEBAUTH_ORIGIN = 'https://adamszreiber.pl' #used for verifying assertions. Only authentication ceremonies occurring in this origin will validate
 
 IMAP_HOST = 'mail.adamszreiber.pl'
 IMAPS_PORT = 993
@@ -146,4 +143,9 @@ IMAPS_PORT = 993
 SMTP_HOST = 'mail.adamszreiber.pl'
 SMTP_PORT = 587
 
-APP_MODE = 'test' #'test' # dev
+CREATE_IMAP_CONNECTION = True
+USE_SERVER_DOMAIN = False
+
+WEBAUTH_RP_ID =  'adamszreiber.pl' if USE_SERVER_DOMAIN else 'localhost'  #the hostname (minus scheme and port) of the server running your Django app
+
+WEBAUTH_ORIGIN = 'https://adamszreiber.pl' if USE_SERVER_DOMAIN else 'http://localhost:3000'  #used for verifying assertions. Only authentication ceremonies occurring in this origin will validate

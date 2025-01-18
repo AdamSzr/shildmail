@@ -20,39 +20,6 @@ from shildmail.website.page_props import HomePageProps
 
 
 def home(request):
-    # props = HomePageProps(request)
-    # print(props)
-
-#     email = 'simple@adamszreiber.pl'
-#     mailboxes = ['Sent', 'Trash', 'INBOX']
-#     message_ids = ['1', '2']
-
-#  # Załóżmy, że te wiadomości zostały pobrane z IMAP i są obiektami Email
-#     raw_message_1 = Message()
-#     raw_message_1['Subject'] = 'Test Email 1'
-#     raw_message_1['From'] = 'sender@example.com'
-#     raw_message_1['To'] = 'recipient@example.com'
-#     raw_message_1['Date'] = '2025-01-01'
-#     raw_message_1['Message-ID'] = '1'
-
-#     raw_message_2 = Message()
-#     raw_message_2['Subject'] = 'Test Email 2'
-#     raw_message_2['From'] = 'sender@example.com'
-#     raw_message_2['To'] = 'recipient@example.com'
-#     raw_message_2['Date'] = '2025-01-02'
-#     raw_message_2['Message-ID'] = '2'
-
-#     messages = [
-#         Email(raw_message_1),
-#         Email(raw_message_2)
-#     ]
-
-#     return render(request, 'home.html', {
-#         'email': email,
-#         'mailboxes': mailboxes,
-#         'message_ids': message_ids,
-#         'messages': messages
-#     })
     props = HomePageProps(request)
     return render(request, 'home.html',props.to_dict())
 
@@ -85,6 +52,7 @@ def decode_mime_words(s):
 
 def mail(request):
     return render(request, 'create_mail.html', {'form': MailForm()})
+
 
 
 def mail_reply(request):

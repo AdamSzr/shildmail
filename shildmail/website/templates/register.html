@@ -9,33 +9,42 @@
 
 
 {% block content %}
-  <h1>Formularz Rejestracji</h1>
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Rejestracja</h1>
 
-    <form method="post" action='/api/register'>
-        {% csrf_token %}
-        <div >
-            {{ form.username.label_tag }}
-            {{ form.username }}
-        </div>
-        <div >
-            {{ form.realname.label_tag }}
-            {{ form.realname }}
-        </div>
-        <div >
-          {{ form.password.label_tag }}
-          {{ form.password }}
-      </div>
-        <button type="submit">Zarejestruj</button>
-    </form>
+    <div class="card mx-auto shadow" style="max-width: 400px;">
+        <div class="card-body">
 
-    {% if messages %}
-          <div>
-              {% for message in messages %}
-                  <div>
-                      {{ message }}
-                  </div>
-              {% endfor %}
-          </div>
-      {% endif %}
+
+        <form method="post" action='/api/register'>
+            {% csrf_token %}
+             <div  class="mb-3">
+                    {{ form.username.label_tag }}
+                    {{ form.username }}
+                </div>
+                <div  class="mb-3" >
+                    {{ form.realname.label_tag }}
+                    {{ form.realname }}
+                </div>
+                <div  class="mb-3" >
+                {{ form.password.label_tag }}
+                {{ form.password }}
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Zarejestruj</button>
+        </form>
+
+        {% if messages %}
+            <div>
+                {% for message in messages %}
+                    <div>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        </div>
+    </div>
+</div>
 
 {% endblock %}

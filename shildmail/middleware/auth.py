@@ -9,7 +9,6 @@ class CustomEmailBackend(BaseBackend):
     """
 
     def authenticate(self, request, email=None, password=None):
-        # print(email, password)
         try:
             # Znajdź użytkownika na podstawie emaila
             user = User.objects.get(pk=email)

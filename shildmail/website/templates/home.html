@@ -27,8 +27,9 @@
                     <div class="card-body p-2">
                         <ul class="list-group">
                             {% for mailbox in mailboxes %}
-                                <li class="list-group-item">
-                                    <a  href="?mailbox={{ mailbox }}{{ request.GET.urlencode|remove_mailbox }}" class="text-decoration-none text-dark">
+                                <li class="list-group-item {% if mailbox == selected_mailbox %}active{% endif %}">
+                                    <a href="?mailbox={{ mailbox }}{{ request.GET.urlencode|remove_mailbox }}"
+                                    class="text-decoration-none text-dark {% if mailbox == selected_mailbox %}text-white{% endif %}">
                                         {{ mailbox }}
                                     </a>
                                 </li>
@@ -96,11 +97,6 @@
                                 <div class="row mb-2">
                                     <div class="col-3"><strong>Treść:</strong></div>
                                     <div class="col">{{ selected_message.content }}</div>
-                                </div>
-
-                                <!-- Przycisk odpowiedzi po prawej stronie -->
-                                <div class="text-end mt-3">
-                                    <a href="/reply?{{ request.GET.urlencode }}" target="_blank" class="btn btn-secondary">Odpowiedz</a>
                                 </div>
                             </div>
                         </div>
