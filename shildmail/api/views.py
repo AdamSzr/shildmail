@@ -193,26 +193,15 @@ def api_send_email(request:HttpRequest):
     if(send_mail(request)): return JsonResponse({'result':True})
     else: return JsonResponse({ 'result':False, 'message': 'SMTP Error'})
 
-# @check_device_id
-def api_ping(request:HttpRequest):
 
-    # mess: Dict[str, Dict[str, str]] = {
-    #    'INBOX':{
-    #       '1':'mail-1',
-    #       '2':'mail-2'
-    #    }
-    # }
+def api_ping(request):
+    return JsonResponse({'ok':True})
 
-    # # mess['Sent'] = {}
+def api_password_generator(request:HttpRequest):
+    return JsonResponse({
+       'raw_password':request.GET['password'],
+       'hashed_password':generate_dovecot_password(request.GET['password'])
+       })
 
-    # mess['Sent']['1'] = 'sent-1'
-    # mess['Sent']['1'] = 'sent-2'
-
-    # selected_mailbox = 'INBOX'
-
-    # maildirs = list(mess.keys())
-
-    print(request.session['email'])
-    return JsonResponse(imap_manager.get_connection(request.session['email']))
 
 

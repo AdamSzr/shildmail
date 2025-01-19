@@ -23,10 +23,11 @@ BASE_DIR = Path(__file__).resolve().parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-f$e*aslx6zbwbf$sxeg(xr&fm5=5m^v7+barb3em-)zl8dq%p-'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.1.22', 'localhost', '127.0.0.1']
+
+ALLOWED_HOSTS = ['192.168.1.22', '188.245.198.229', 'localhost', '127.0.0.1', 'adamszreiber.pl', 'www.adamszreiber.pl',]
+CSRF_TRUSTED_ORIGINS = ['https://adamszreiber.pl', 'https://www.adamszreiber.pl']
+
 LOGIN_URL= '/login'
 
 
@@ -143,8 +144,10 @@ IMAPS_PORT = 993
 SMTP_HOST = 'mail.adamszreiber.pl'
 SMTP_PORT = 587
 
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = True
 CREATE_IMAP_CONNECTION = True
-USE_SERVER_DOMAIN = False
+USE_SERVER_DOMAIN = True
 
 WEBAUTH_RP_ID =  'adamszreiber.pl' if USE_SERVER_DOMAIN else 'localhost'  #the hostname (minus scheme and port) of the server running your Django app
 

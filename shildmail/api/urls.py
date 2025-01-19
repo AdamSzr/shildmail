@@ -20,4 +20,6 @@ urlpatterns = [
     path('register-device', login_required(views.api_register_webauthn_device), name='api-register-device'), # get - returns challange, post saves data
 
     path('ping', views.api_ping, name='api-ping'),
+
+    path('password-generator', views.api_password_generator, name='api-password-generator'),
 ]

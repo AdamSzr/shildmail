@@ -45,25 +45,3 @@ class HomePageProps:
             'selected_message': self.selected_message.to_dict() if self.selected_message else None,
         }
 
-    def mock(self,request:HttpRequest):
-        message_id= request.GET.get('message_id')
-        mailbox = request.GET.get('mailbox')
-
-        print(f'{message_id} | {mailbox}')
-
-
-        messages = {
-                '1': Email().to_dict(),
-                '2': Email().to_dict(),
-                '3': Email().to_dict(),
-                '4': Email().to_dict(),
-        }
-
-        return {
-            'email':'simple@adamszreiber.pl',
-            'mailboxes':['INBOX','Trash','Sent'],
-            'message_ids':['1','2','3','4'],
-            'selected_mailbox':mailbox,
-            'selected_message': messages[message_id] if message_id is not None else None,
-            'messages':messages
-        }

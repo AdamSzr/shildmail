@@ -8,7 +8,7 @@ from email.message import Message
 
 
 class Email:
-    counter = 0  # Zmienna statyczna (klasowa)
+
 
     # def __init__(self):
     #     self.raw = b''  # Przechowujemy całą surową wiadomość
@@ -57,12 +57,12 @@ class Email:
 
 
     def format_date(self, input_date:str):
-        parsed_date = datetime.strptime(input_date, "%a, %d %b %Y %H:%M:%S %z")
-
-        return parsed_date.strftime("%d.%m.%Y %H:%M")
+        try:
+            return datetime.strptime(input_date, "%a, %d %b %Y %H:%M:%S %z").strftime("%d.%m.%Y %H:%M")
+        except:
+            return input_date
     
     def to_dict(self):
-        Email.counter+=1
         return {
             'raw':self.raw,
             'subject':self.subject,

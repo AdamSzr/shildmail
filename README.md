@@ -52,7 +52,7 @@ Referenced by:
 ### Tworzenie tabeli sessji django
 ``` sql
 CREATE TABLE django_session (
-    session_key VARCHAR(40) NOT NULL PRIMARY KEY,
+    session_key VARCHAR NOT NULL PRIMARY KEY,
     session_data TEXT NOT NULL,
     expire_date TIMESTAMP NOT NULL
 );
@@ -87,3 +87,4 @@ UPDATE users
 SET password = '{SHA512}YEx+jYQ9s94cstHkkm4St3zD8fwQxE/8w0gbOI53u1ySLNFMqHPskMBv5CLqEjgbkGnpoqHC1xm+FRrJOVgh7w=='
 WHERE email = 'sigma@adamszreiber.pl';
 ```
+

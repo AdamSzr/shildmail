@@ -15,7 +15,7 @@ class IMAPManager:
         """
         Zwraca połączenie IMAP dla podanego user_id, lub None, jeśli nie ma połączenia.
         """
-        print(list(self.connections.keys()))
+        print(f'Połączenia IMAP: {list(self.connections.keys())}')
         return self.connections.get(email)
 
     def create_connection(self, email: str, password: str) -> IMAPAdapter:
