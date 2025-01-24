@@ -1,7 +1,8 @@
 from email.message import Message
 import logging
 import re
-from django.http import HttpResponse, JsonResponse
+import uuid
+from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import render
 import email
 import random
@@ -14,6 +15,8 @@ from shildmail.imap.manager import imap_manager
 from shildmail.models.passkeys import WebAuthnCredential
 from shildmail.website.forms import LoginForm, MailForm, RegisterForm
 from email.header import decode_header
+from shildmail.cashe import memory_storage
+from shildmail.models.passkeys_registration import PasskeysRegistration
 
 from shildmail.website.page_props import HomePageProps
 
@@ -21,7 +24,7 @@ from shildmail.website.page_props import HomePageProps
 
 def home(request):
     props = HomePageProps(request)
-    return render(request, 'home.html',props.to_dict())
+    return render(request, 'home.html', props.to_dict())
 
 def login(request):
     return render(request, 'login.html', {'form': LoginForm()})
@@ -34,11 +37,14 @@ def second_factor_authentication(request):
     return render(request, 'second_factor_authentication.html')
 
 def register(request):
-    return render(request, 'register.html',{'form':RegisterForm()})
+    return render( request, 'register.html', { 'form' : RegisterForm() } )
 
-def register_credentials(request):
-    return render(request, 'register_credentials.html',{'name':'register credentials'})
+def register_credentials(request:HttpRequest):
+    uuid = request.GET.get('uuid')
+    return render(request, 'register_credentials.html',{'name':'register credentials', 'uuid':uuid})
 
+def add_credentials(request:HttpRequest):
+    return render(request, 'add-credentials.html', {'name':'add credentials'})
 
 def decode_mime_words(s):
     """

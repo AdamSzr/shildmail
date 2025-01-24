@@ -1,5 +1,6 @@
 import json
 from typing import Dict
+from uuid import uuid4
 from django.http import HttpRequest, HttpResponseRedirect, JsonResponse, HttpResponseBadRequest
 from django.shortcuts import redirect
 from django.urls import reverse
@@ -7,6 +8,7 @@ from webauthn import generate_authentication_options, generate_registration_opti
 from shildmail.imap.email import Email
 from shildmail.imap.manager import imap_manager
 from shildmail.models.passkeys import WebAuthnCredential
+from shildmail.models.passkeys_registration import PasskeysRegistration
 from shildmail.models.user import User
 from shildmail.settings import WEBAUTH_ORIGIN, WEBAUTH_RP_ID, WEBAUTH_RP_NAME, CREATE_IMAP_CONNECTION
 from shildmail.smtp.send_mail import send_mail
@@ -18,6 +20,7 @@ from webauthn.helpers import (
     parse_registration_credential_json,
     parse_authentication_credential_json
 )
+from shildmail.cashe import memory_storage
 
 from webauthn.helpers.structs import (
     PublicKeyCredentialDescriptor,
@@ -75,22 +78,102 @@ def api_register(request):
 
     password = generate_dovecot_password(form.cleaned_data['password'])
 
-    User.objects.create(
+    usr = User.objects.create(
        email=data['username'],
        realname=data['realname'],
        password=password,
        maildir=data['realname'].lower().replace(' ', '_') + '/'
     )
 
-    return JsonResponse({'result':True})
+
+    uuid = str(uuid4())
+    memory_storage.set(uuid, PasskeysRegistration(uuid, usr.email ) )
+    return redirect('/register-credentials?uuid='+uuid)
 
 
 def api_logout(request):
     imap_manager.close_connection(request.user.email)
     logout(request)  # Wylogowuje użytkownika
-    return HttpResponseRedirect(reverse('login'))
 
-def api_register_webauthn_device(request):
+    return redirect('login')
+
+def api_register_webauthn_device(request:HttpRequest):
+    if request.method == 'GET':
+      uuid=request.GET.get('uuid')
+      if(not uuid): return JsonResponse({'result':False, 'error':'no uuid query provided','redirect':'/register'})
+
+      passkey_reg:PasskeysRegistration = memory_storage.get(uuid)
+
+      if(not passkey_reg):
+        return JsonResponse({'result':False, 'error':'no passkeys item in storage for given uuid','redirect':'/register'})
+
+      if(passkey_reg.is_expired()):
+        User.objects.delete_user(passkey_reg.email)
+        memory_storage.pop(uuid)
+        return JsonResponse({'result':False, 'error':'Time limit for registration passkeys expored','redirect':'/register'})
+
+
+      registration_options: PublicKeyCredentialCreationOptions = generate_registration_options(
+        rp_id=WEBAUTH_RP_ID,
+        rp_name=WEBAUTH_RP_NAME,
+        user_name=passkey_reg.email,
+      )
+
+      # request.session['challange'] = registration_options.challenge.hex()
+      passkey_reg.challange = registration_options.challenge.hex()
+      options_json = json.loads(options_to_json(registration_options))
+
+      options_json["extensions"] = {
+        "credProps": True,
+      }
+
+      return JsonResponse(options_json)
+    else:
+      body_json: dict = json.loads(request.body)
+
+      uuid=request.GET.get('uuid')
+      if(not uuid):
+        return JsonResponse({'result':False, 'error':'no uuid in url query','redirect':'/register'})
+
+      passkey_reg:PasskeysRegistration = memory_storage.get(uuid)
+
+      if(passkey_reg.is_expired()):
+        User.objects.delete_user(passkey_reg.email)
+        memory_storage.pop(uuid)
+        return JsonResponse({'result':False, 'error':'Time limit for registration passkeys expored','redirect':'/register'})
+
+
+
+      credential = parse_registration_credential_json(body_json)
+
+      verification = verify_registration_response(
+          credential=credential,
+          expected_challenge=bytes.fromhex(passkey_reg.challange),
+          expected_rp_id=WEBAUTH_RP_ID,
+          expected_origin=WEBAUTH_ORIGIN,
+          require_user_verification=False,
+      )
+
+      new_passkey = WebAuthnCredential.objects.create(
+          username=passkey_reg.email,
+          credential_id=verification.credential_id,
+          credential_public_key=verification.credential_public_key,
+          credential_type=verification.credential_type,
+          aaguid=verification.aaguid,
+          transports=body_json['response'].get("transports", list),
+          is_discoverable=True,
+          sign_count=verification.sign_count,
+          authenticator_attachment=body_json['authenticatorAttachment'],
+          public_key_algorithm=body_json['response'].get("publicKeyAlgorithm", 0),
+      )
+
+      new_passkey.save()
+
+      memory_storage.pop(uuid)
+      return JsonResponse({'result':True, 'redirect':'/login'})
+    
+
+def api_add_webauthn_device(request:HttpRequest):
     if request.method == 'GET':
       credentials = WebAuthnCredential.objects.filter(username=request.user.email)
 
@@ -99,12 +182,12 @@ def api_register_webauthn_device(request):
         rp_name=WEBAUTH_RP_NAME,
         user_name=request.user.email,
         exclude_credentials=[
-            PublicKeyCredentialDescriptor(
-              id=credential.credential_id,
-              type= PublicKeyCredentialType(credential.credential_type),
-              transports=[ AuthenticatorTransport(trans) for trans in credential.transports ]
-            )
-            for credential in credentials
+          PublicKeyCredentialDescriptor(
+            id=credential.credential_id,
+            type= PublicKeyCredentialType(credential.credential_type),
+            transports=[ AuthenticatorTransport(trans) for trans in credential.transports ]
+          )
+          for credential in credentials
         ]
       )
 
@@ -145,7 +228,7 @@ def api_register_webauthn_device(request):
 
       new_passkey.save()
 
-      return redirect('second-factor-authentication')
+      return JsonResponse({'result':True})
 
 def api_webauthn(request):
     if request.method == 'GET':
@@ -184,7 +267,7 @@ def api_webauthn(request):
 
       request.session['credential_id'] = credential.id
 
-      return redirect('home')
+      return JsonResponse({'result':True, 'redirect':'/'})
 
 def api_send_email(request:HttpRequest):
     if(request.method != 'POST'):

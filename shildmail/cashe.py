@@ -7,6 +7,9 @@ class InMemoryStorage:
 
     def get(self, key):
         return self.data.get(key, None)
+    
+    def pop(self, key):
+        return self.data.pop(key, None)
 
     def display_all(self):
         print("Wszystkie dane:")

@@ -21,8 +21,17 @@ class UserManager(BaseUserManager):
         # Zapisujemy użytkownika
         user.save(using=self._db)
 
-    # def get(self,*args, **kwargs):
-    #     return super().get(*args, **kwargs)
+    def delete_user(self, email):
+        """
+        Usuwa użytkownika na podstawie adresu email.
+        """
+        try:
+            # Pobierz użytkownika
+            user = self.get(email=email)
+            user.delete()  # Usuń użytkownika z bazy danych
+            return True
+        except self.model.DoesNotExist:
+            return False
 
 
 

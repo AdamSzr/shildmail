@@ -1,6 +1,3 @@
-
-from django.contrib import admin
-from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
 from django.urls import path
 
@@ -14,7 +11,7 @@ urlpatterns = [
     path('login', views.login, name='login'),
     path('2fa', login_required(views.second_factor_authentication), name='second-factor-authentication'),
     path('register', views.register, name='register'),
-    path('register-credentials', login_required(views.register_credentials), name='register-credentials'),
+    path('register-credentials', views.register_credentials, name='register-credentials'),
+    path('add-credentials', webauthn_login_required(login_required(views.add_credentials)), name='add-credentials'),
     path('mail', webauthn_login_required(login_required(views.mail)), name='create-mail'),
-    # path('reply', webauthn_login_required(login_required( (views.mail_reply))), name='mail_reply'),
 ]
