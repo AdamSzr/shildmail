@@ -43,7 +43,8 @@
         headers: { 'Content-Type': 'application/json', 'X-CSRFToken':csrfToken },
         body: JSON.stringify(assertionResp),
       })
-      .then(response => response.redirected && (window.location.href = response.url) )
+      .then( it => it.json() )
+      .then(response => response.redirect && (window.location.href = response.redirect))
     }
   </script>
 

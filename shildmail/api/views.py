@@ -100,17 +100,17 @@ def api_logout(request):
 def api_register_webauthn_device(request:HttpRequest):
     if request.method == 'GET':
       uuid=request.GET.get('uuid')
-      if(not uuid): return JsonResponse({'result':False, 'error':'no uuid query provided','redirect':'/register'})
+      if(not uuid): return JsonResponse({'result':False, 'error':'no uuid query provided','redirect':'/register'},status = 400)
 
       passkey_reg:PasskeysRegistration = memory_storage.get(uuid)
 
       if(not passkey_reg):
-        return JsonResponse({'result':False, 'error':'no passkeys item in storage for given uuid','redirect':'/register'})
+        return JsonResponse({'result':False, 'error':'no passkeys item in storage for given uuid','redirect':'/register'}, status = 404)
 
       if(passkey_reg.is_expired()):
         User.objects.delete_user(passkey_reg.email)
         memory_storage.pop(uuid)
-        return JsonResponse({'result':False, 'error':'Time limit for registration passkeys expored','redirect':'/register'})
+        return JsonResponse({'result':False, 'error':'Time limit for registration passkeys expored','redirect':'/register'},410)
 
 
       registration_options: PublicKeyCredentialCreationOptions = generate_registration_options(
@@ -133,14 +133,14 @@ def api_register_webauthn_device(request:HttpRequest):
 
       uuid=request.GET.get('uuid')
       if(not uuid):
-        return JsonResponse({'result':False, 'error':'no uuid in url query','redirect':'/register'})
+        return JsonResponse({'result':False, 'error':'no uuid in url query','redirect':'/register'}, 400)
 
       passkey_reg:PasskeysRegistration = memory_storage.get(uuid)
 
       if(passkey_reg.is_expired()):
         User.objects.delete_user(passkey_reg.email)
         memory_storage.pop(uuid)
-        return JsonResponse({'result':False, 'error':'Time limit for registration passkeys expored','redirect':'/register'})
+        return JsonResponse({'result':False, 'error':'Time limit for registration passkeys expored','redirect':'/register'}, 410)
 
 
 
@@ -271,10 +271,10 @@ def api_webauthn(request):
 
 def api_send_email(request:HttpRequest):
     if(request.method != 'POST'):
-      return JsonResponse({'result':False, 'message': 'wrong http method'})
+      return JsonResponse({'result':False, 'message': 'wrong http method'}, status = 405)
 
     if(send_mail(request)): return JsonResponse({'result':True})
-    else: return JsonResponse({ 'result':False, 'message': 'SMTP Error'})
+    else: return JsonResponse({ 'result':False, 'message': 'SMTP Error'}, 500)
 
 
 def api_ping(request):
