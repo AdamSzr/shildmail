@@ -146,8 +146,8 @@ SMTP_PORT = 587
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-CREATE_IMAP_CONNECTION = True
-USE_SERVER_DOMAIN = True
+CREATE_IMAP_CONNECTION = False
+USE_SERVER_DOMAIN = False
 
 WEBAUTH_RP_ID =  'adamszreiber.pl' if USE_SERVER_DOMAIN else 'localhost'  #the hostname (minus scheme and port) of the server running your Django app
 

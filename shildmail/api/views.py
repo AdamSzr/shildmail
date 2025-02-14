@@ -143,7 +143,6 @@ def api_register_webauthn_device(request:HttpRequest):
         return JsonResponse({'result':False, 'error':'Time limit for registration passkeys expored','redirect':'/register'}, 410)
 
 
-
       credential = parse_registration_credential_json(body_json)
 
       verification = verify_registration_response(
