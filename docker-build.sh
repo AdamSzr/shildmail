@@ -3,7 +3,7 @@
 if [ "$1" == "build" ]; then
     echo "Building and starting the container..."
 
-    docker build -t shildmail . 
+    docker build -t shildmail .
     # docker compose up -d &&
     # docker logs -f shildmail
 

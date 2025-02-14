@@ -30,15 +30,17 @@
 
   <script>
      async function device_auth() {
-      authenticationOptionsJSON = await fetch('/api/webauthn')
-      .then(it => it.json())
-
+      authenticationOptionsJSON = await fetch('/api/webauthn').then(it => it.json())
 
       const assertionResp = await SimpleWebAuthnBrowser.startAuthentication({
         optionsJSON: authenticationOptionsJSON
       });
 
-      const apiAuthVerResp = await fetch('/api/webauthn', {
+      await sendAssertion(assertionResp)
+    }
+
+    const sendAssertion = (assertionResp) =>{
+      const apiAuthVerResp = fetch('/api/webauthn', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-CSRFToken':csrfToken },
         body: JSON.stringify(assertionResp),

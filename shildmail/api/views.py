@@ -56,7 +56,9 @@ def api_login(request):
           imap_manager.create_connection( email, request.session['raw_password'] )
 
         if(userHasKeys): return redirect('second-factor-authentication')
-        else: return redirect('register-credentials')
+        else:
+          User.objects.delete_user(email)
+          return JsonResponse({'message':"Your account has been deleted due to no passkeys registered"}, status=400)
 
     else: return JsonResponse({'message':"Invalid credentials"}, status=400)
 
@@ -102,32 +104,27 @@ def api_register_webauthn_device(request:HttpRequest):
       uuid=request.GET.get('uuid')
       if(not uuid): return JsonResponse({'result':False, 'error':'no uuid query provided','redirect':'/register'},status = 400)
 
-      passkey_reg:PasskeysRegistration = memory_storage.get(uuid)
+      passkey_registration:PasskeysRegistration = memory_storage.get(uuid)
 
-      if(not passkey_reg):
+      if(not passkey_registration):
         return JsonResponse({'result':False, 'error':'no passkeys item in storage for given uuid','redirect':'/register'}, status = 404)
 
-      if(passkey_reg.is_expired()):
-        User.objects.delete_user(passkey_reg.email)
+      if(passkey_registration.is_expired()):
+        User.objects.delete_user(passkey_registration.email)
         memory_storage.pop(uuid)
         return JsonResponse({'result':False, 'error':'Time limit for registration passkeys expored','redirect':'/register'},410)
 
 
+      # tworzenie opcji rejestracji klucza
       registration_options: PublicKeyCredentialCreationOptions = generate_registration_options(
-        rp_id=WEBAUTH_RP_ID,
-        rp_name=WEBAUTH_RP_NAME,
-        user_name=passkey_reg.email,
+        rp_id=WEBAUTH_RP_ID, # adamszreiber.pl
+        rp_name=WEBAUTH_RP_NAME, # Shild Mail
+        user_name=passkey_registration.email, # email użytkownika
       )
-
-      # request.session['challange'] = registration_options.challenge.hex()
-      passkey_reg.challange = registration_options.challenge.hex()
-      options_json = json.loads(options_to_json(registration_options))
-
-      options_json["extensions"] = {
-        "credProps": True,
-      }
-
-      return JsonResponse(options_json)
+      passkey_registration.challange = registration_options.challenge.hex() # zapisanie challange do pamięci
+      reg_options_json = json.loads(options_to_json(registration_options)) # konwersja obiektu PublicKeyCredentialCreationOptions na JSON
+      reg_options_json["extensions"] = { "credProps": True } # informuje o tym czy klucz możliwy do wyświatlania w aplikacji YubicoAuthenticatior
+      return JsonResponse(reg_options_json) # Wysłanie opcji do przeglądarki
     else:
       body_json: dict = json.loads(request.body)
 
@@ -135,26 +132,27 @@ def api_register_webauthn_device(request:HttpRequest):
       if(not uuid):
         return JsonResponse({'result':False, 'error':'no uuid in url query','redirect':'/register'}, 400)
 
-      passkey_reg:PasskeysRegistration = memory_storage.get(uuid)
+      passkey_registration:PasskeysRegistration = memory_storage.get(uuid)
 
-      if(passkey_reg.is_expired()):
-        User.objects.delete_user(passkey_reg.email)
+      if(passkey_registration.is_expired()):
+        User.objects.delete_user(passkey_registration.email)
         memory_storage.pop(uuid)
         return JsonResponse({'result':False, 'error':'Time limit for registration passkeys expored','redirect':'/register'}, 410)
 
 
-      credential = parse_registration_credential_json(body_json)
 
-      verification = verify_registration_response(
+      # sprawdzenie poprawności formatu otrzymanych danych i utworzneie obiektu RegistrationCredential
+      credential = parse_registration_credential_json(body_json)
+      verification = verify_registration_response( # Sprawdzenie otrzymanych danych (walidacja) i utworzenie obiektu VerifiedRegistration
           credential=credential,
-          expected_challenge=bytes.fromhex(passkey_reg.challange),
+          expected_challenge=bytes.fromhex(passkey_registration.challange),
           expected_rp_id=WEBAUTH_RP_ID,
           expected_origin=WEBAUTH_ORIGIN,
           require_user_verification=False,
       )
-
+      # Stworzenie nowego opiektu poświadczeń FIDO
       new_passkey = WebAuthnCredential.objects.create(
-          username=passkey_reg.email,
+          username=passkey_registration.email,
           credential_id=verification.credential_id,
           credential_public_key=verification.credential_public_key,
           credential_type=verification.credential_type,
@@ -165,12 +163,9 @@ def api_register_webauthn_device(request:HttpRequest):
           authenticator_attachment=body_json['authenticatorAttachment'],
           public_key_algorithm=body_json['response'].get("publicKeyAlgorithm", 0),
       )
-
-      new_passkey.save()
-
-      memory_storage.pop(uuid)
-      return JsonResponse({'result':True, 'redirect':'/login'})
-    
+      new_passkey.save() # Zapisanie obiektu poświadczeń do bazy danych
+      memory_storage.pop(uuid) # Usunięcie z pamięci obiektu pomocniczego PasskeysRegistration
+      return JsonResponse({'result':True, 'redirect':'/login'}) # Wysłanie potwierdzenia poprawnego dodania klucza
 
 def api_add_webauthn_device(request:HttpRequest):
     if request.method == 'GET':
@@ -231,29 +226,31 @@ def api_add_webauthn_device(request:HttpRequest):
 
 def api_webauthn(request):
     if request.method == 'GET':
-      credentials = WebAuthnCredential.objects.filter(username=request.user.email)
 
+      # Pobranie zarejestrowanych kluczy dla użytkownika z bazy danych
+      credentials = WebAuthnCredential.objects.filter(username=request.user.email)
+      # Wygenerowanie opcji autentykacji przy pomocy klucza
       authentication_options: PublicKeyCredentialRequestOptions = generate_authentication_options(
-        rp_id=WEBAUTH_RP_ID,
+        rp_id=WEBAUTH_RP_ID, # adamszreiber.pl
         allow_credentials=[
+            # Dla każdego znalezionego klucza tworzony jest obiekt PublicKeyCredentialDescriptor
             PublicKeyCredentialDescriptor(id=credential.credential_id)
             for credential in credentials
         ],
       )
-
+      # Do sesji użytkownika zostaje zapisany wygenerowany challange
       request.session['challenge'] = authentication_options.challenge.hex()
-
+      # Konwersja formatu z PublicKeyCredentialRequestOptions do JSON
       response_json = json.loads(options_to_json(authentication_options))
-
-      return JsonResponse(response_json)
+      return JsonResponse(response_json) # Wysłanie danych do przeglądarki
     else:
       body_json: dict = json.loads(request.body)
+      # Sprawdzenie poprawności formatu wysłanych danych i utworzenie AuthenticationCredential
       credential = parse_authentication_credential_json(body_json)
+      # Pobranie klucza który użytkownik przedstawił w procesie autentyfikacji
       db_credential = WebAuthnCredential.objects.filter(username=request.user.email, credential_id=credential.raw_id).first()
-
-      challenge = request.session['challenge']
-
-      verification = verify_authentication_response(
+      challenge = request.session['challenge'] # Wydobycie wyzwania z sesji użytkownika
+      verification = verify_authentication_response( # Weryfikacja poprawności autentyfikacji i utworzenie obiektu VerifiedAuthentication
             credential=credential,
             expected_challenge=bytes.fromhex(challenge),
             expected_rp_id=WEBAUTH_RP_ID,
@@ -261,12 +258,9 @@ def api_webauthn(request):
             credential_public_key=db_credential.credential_public_key,
             credential_current_sign_count=db_credential.sign_count,
       )
-
-      WebAuthnCredential.objects.update_sign_count(credential_id=credential.raw_id, count=verification.new_sign_count)
-
-      request.session['credential_id'] = credential.id
-
-      return JsonResponse({'result':True, 'redirect':'/'})
+      WebAuthnCredential.objects.update_sign_count(credential_id=credential.raw_id, count=verification.new_sign_count) # Aktualizacja wartości licznika w bazie danych
+      request.session['credential_id'] = credential.id # Zapisanie id klucza który przedstawił w procesie autentyfikacji
+      return JsonResponse({'result':True, 'redirect':'/'}) # Przesłanie informacji o poprawym uwierzytelnieniu
 
 def api_send_email(request:HttpRequest):
     if(request.method != 'POST'):

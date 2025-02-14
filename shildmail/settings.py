@@ -25,8 +25,8 @@ SECRET_KEY = 'django-insecure-f$e*aslx6zbwbf$sxeg(xr&fm5=5m^v7+barb3em-)zl8dq%p-
 
 
 
-ALLOWED_HOSTS = ['192.168.1.22', '188.245.198.229', 'localhost', '127.0.0.1', 'adamszreiber.pl', 'www.adamszreiber.pl',]
-CSRF_TRUSTED_ORIGINS = ['https://adamszreiber.pl', 'https://www.adamszreiber.pl']
+ALLOWED_HOSTS = ['192.168.1.22', '188.245.198.229', 'localhost', '127.0.0.1', 'adamszreiber.pl', 'www.adamszreiber.pl', 'adanszreiber.pl']
+CSRF_TRUSTED_ORIGINS = ['https://adamszreiber.pl', 'https://www.adamszreiber.pl', 'https://adanszreiber.pl']
 
 LOGIN_URL= '/login'
 
@@ -146,9 +146,12 @@ SMTP_PORT = 587
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-CREATE_IMAP_CONNECTION = False
-USE_SERVER_DOMAIN = False
+CREATE_IMAP_CONNECTION = True
+USE_SERVER_DOMAIN = True
 
-WEBAUTH_RP_ID =  'adamszreiber.pl' if USE_SERVER_DOMAIN else 'localhost'  #the hostname (minus scheme and port) of the server running your Django app
+DOMAIN =  'adamszreiber.pl'
+LOCALHOST_DOMAIN = 'localhost'
 
-WEBAUTH_ORIGIN = 'https://adamszreiber.pl' if USE_SERVER_DOMAIN else 'http://localhost:3000'  #used for verifying assertions. Only authentication ceremonies occurring in this origin will validate
+WEBAUTH_RP_ID = DOMAIN if USE_SERVER_DOMAIN else LOCALHOST_DOMAIN  #the hostname (minus scheme and port) of the server running your Django app
+
+WEBAUTH_ORIGIN = ('https://' + DOMAIN) if USE_SERVER_DOMAIN else f'http://{LOCALHOST_DOMAIN}:3000'  #used for verifying assertions. Only authentication ceremonies occurring in this origin will validate

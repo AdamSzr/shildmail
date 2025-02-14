@@ -88,3 +88,7 @@ SET password = '{SHA512}YEx+jYQ9s94cstHkkm4St3zD8fwQxE/8w0gbOI53u1ySLNFMqHPskMBv
 WHERE email = 'sigma@adamszreiber.pl';
 ```
 
+
+
+docker pull adamszr/shildmail && docker run -d -p 3000:8000 adamszr/shildmail
+
