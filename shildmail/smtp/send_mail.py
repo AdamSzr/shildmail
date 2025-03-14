@@ -5,6 +5,7 @@ from email.mime.multipart import MIMEMultipart
 from django.http import HttpRequest
 from shildmail.settings import SMTP_HOST, SMTP_PORT
 from shildmail.website.forms import MailForm
+from email.utils import formatdate
 
 
 def send_mail(request:HttpRequest) -> bool:
@@ -22,6 +23,7 @@ def send_mail(request:HttpRequest) -> bool:
     message["From"] = user.email
     message["To"] = mail_data['to']
     message["Subject"] =  mail_data['subject']
+    message['Date'] = formatdate()
 
     # Wysyłanie e-maila
     try:
